@@ -7,8 +7,12 @@
  * defined in movie_casts.tsv. Feel free to modify any/all aspects as you wish.
  */
 
+
 #ifndef ACTORGRAPH_HPP
 #define ACTORGRAPH_HPP
+
+#include "Actor.hpp"
+#include "Edge.hpp"
 
 #include <iostream>
 
@@ -23,6 +27,8 @@ protected:
 
 public:
     ActorGraph(void);
+    vector<Actor *> actorVec;
+    vector<Edge *> edgeVec;
 
     // Maybe add some more methods here
   
