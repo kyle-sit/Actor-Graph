@@ -13,13 +13,11 @@
 
 #include "Actor.hpp"
 #include "Edge.hpp"
-
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <string>
-
-// Maybe include some data structures here
+#include <unordered_map>
 
 using namespace std;
 
@@ -30,7 +28,7 @@ protected:
 
 public:
     ActorGraph(void);
-    std::unordered_map<Edge, std::vector<Actor*>> connections;
+    std::unordered_map<Edge*, std::vector<Actor*>> connections;
     std::vector<Actor*> actors;
     std::vector<Edge*> movies;
 

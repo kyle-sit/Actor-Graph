@@ -12,8 +12,11 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "Edge.hpp"
+#include <unordered_map>
+#include "Edge.cpp"
+#include "Actor.cpp"
 #include "Actor.hpp"
+#include "Edge.hpp"
 #include "ActorGraph.hpp"
 
 using namespace std;
@@ -26,7 +29,7 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
     bool have_header = false;
  
     //Keep position in while loop
-    int pos = infile.beg; 
+    std::ios_base::seekdir pos = infile.beg; 
 
     // keep reading lines until the end of file is reached
     while (infile) {
@@ -38,7 +41,7 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
         if (!getline( infile, s )) break;
 
         //save position
-        pos = infile.tellg();
+        pos = infile.cur;
         
         if (!have_header) {
             // skip the header
@@ -69,109 +72,69 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
     
         // we have an actor/movie relationship, now what?
         Edge currMovie = Edge(movie_title, movie_year);
-        
+       
+        std::vector<Edge*>::iterator it;
         //is the movie we just processed already in our vector of movies?
-        for (std::vector<Edge*>::iterator it = movies.begin() ; it != movies.end(); ++it) {
+        for (it = movies.begin(); it != movies.end(); ++it) {
           if( currMovie == *(*it) ) {
-            exists = true;
-          }
-        }
-        //If we have never seen this movie, create a new pointer
-        if( !exists ) {
-          Edge* newMovie = new Edge(movie_title, movie_year);
-          movies.push_back(newMovie);
-        }
-
-        boolean exists = false;
-        for (std::vector<Actor*>::iterator it = actors.begin() ; it != actors.end(); ++it) {
-          if( actor_name == (*it)->actorName ) {
-            exists = true;
-          }
-        }
-        
-        //Our actor has not been found so we appropriately create its node   
-        if( !exists ) {
-          Actor* newActor = new Actor( actor_name );
-          actors.push_back( newActor );
-        }
-            
-        /*bool exists = false;
-            
-        //is the movie we just processed already in our vector of movies?
-        for (std::vector<Edge*>::iterator it = movies.begin() ; it != movies.end(); ++it) {
-          if( currMovie == *(*it) ) {
-            exists = true;
+            break;
           }
         }
 
-        //movie is a unique movie
-        if( !exists ){
+        //Two cases if movie is new and if it is not new
+        if( it == movies.end() ) {
+          //Allocate new edge and push it to global list
           Edge* newMovie = new Edge(movie_title, movie_year);
           movies.push_back(newMovie);
           
-          //if our actor isn't in our set of strings, add it into our set
-          //and create a new Actor object from it and add to set of Actor *s
-          exists = false;
-          for (std::vector<Actor*>::iterator it = actors.begin() ; it != actors.end(); ++it) {
-            if( actor_name == (*it)->actorName ) {
-              exists = true;
+          //Check if associated actor is new
+          std::vector<Actor*>::iterator it2;
+          for(it2 = actors.begin(); it2 != actors.end(); ++it) {
+            if( actor_name == (*it2)->actorName ) {
+              break;
             }
           }
-          
-          //Our actor has not been found so we appropriately create its node   
-          if( !exists ) {
-            Actor* newActor = new Actor( actor_name );
-            actors.push_back( newActor );
-            newMovie.listOfActors.push_back(newActor);
-            newActor.edges.push_back(newMovie);
+
+          //Two cases if actor is new and if it is not new
+          if( it2 == actors.end() ) {
+            Actor* newActor = new Actor(actor_name);
+            actors.push_back(newActor);
+            connections[newMovie].push_back(newActor);
+            (newActor->edges).push_back(newMovie);
+          }
+          //Actor is not new
+          else {
+            connections[newMovie].push_back(*it2);
+            ((*it2)->edges).push_back(newMovie);
+          }
+        }
+        //movie is not new
+        else{
+          //Check if associated actor is new
+          std::vector<Actor*>::iterator it2;
+          for(it2 = actors.begin(); it2 != actors.end(); ++it) {
+            if( actor_name == (*it2)->actorName ) {
+              break;
+            }
           }
 
-          while (infile) {
-            string s;
- 
-            // get the next line
-            if (!getline( infile, s )) break;
-  
-            istringstream ss( s );
-            vector <string> record;
-  
-            while (ss) {
-              string next;
-      
-              // get the next string before hitting a tab character and put it in 'next'
-              if (!getline( ss, next, '\t' )) break;
-                record.push_back( next );
-              }
-  
-              if (record.size() != 3) {
-                //we should have exactly 3 columns
-                continue;
-              }
- 
-              string actorName(record[0]);
-              string movieTitle(record[1]);
-              int movieYear = stoi(record[2]);
-          
-              if( movie_title == movieTitle && movie_year == movieYear) {
-                bool alsoExists = false;
-                for (std::vector<Actor*>::iterator it = actors.begin() ; it != actors.end(); ++it) {
-                  if( actorName == (*it)->actorName ) {
-                    alsoExists = true;
-                  }
-                }
-             
-                if( !alsoExists ) {
-                  Actor* newActor = new Actor( actorName );
-                  actors.push_back( newActor );
-                  newMovie.listOfActors.push_back(newActor);
-                  newActor.edges.push_back(newMovie);
-                }
-              }
-          }*/
+          //Two cases if actor is new and if it is not new
+          if( it2 == actors.end() ) {
+            Actor* newActor = new Actor(actor_name);
+            actors.push_back(newActor);
+            connections[*it].push_back(newActor);
+            (newActor->edges).push_back(*it);
+          }
+          //Actor is not new
+          else {
+            connections[*it].push_back(*it2);
+            ((*it2)->edges).push_back(*it);
+          }
+        }
     }
 
     if (!infile.eof()) {
-        cerr << "Failed to read " << in_filename << "!\n";
+        cerr << "Failed to read " << infile << "!\n";
         return false;
     }
     infile.close();
