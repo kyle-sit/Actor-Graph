@@ -13,7 +13,7 @@ class Actor {
     string actorName;
     bool visited;
     int distance;
-    Actor * prevActor;
+    Actor* prevActor;
     vector<Edge*> edges;
 
     Actor(string actorName){

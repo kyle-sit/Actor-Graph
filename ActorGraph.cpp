@@ -12,11 +12,13 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "Edge.hpp"
+#include "Actor.hpp"
 #include "ActorGraph.hpp"
 
 using namespace std;
 
-ActorGraph::ActorGraph(void) {}
+ActorGraph::ActorGraph() {}
 
 bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
     
@@ -24,7 +26,7 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
     bool have_header = false;
  
     //Keep position in while loop
-    int pos = infile.beg;
+    int pos = infile.beg; 
 
     // keep reading lines until the end of file is reached
     while (infile) {
@@ -67,8 +69,33 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
     
         // we have an actor/movie relationship, now what?
         Edge currMovie = Edge(movie_title, movie_year);
+        
+        //is the movie we just processed already in our vector of movies?
+        for (std::vector<Edge*>::iterator it = movies.begin() ; it != movies.end(); ++it) {
+          if( currMovie == *(*it) ) {
+            exists = true;
+          }
+        }
+        //If we have never seen this movie, create a new pointer
+        if( !exists ) {
+          Edge* newMovie = new Edge(movie_title, movie_year);
+          movies.push_back(newMovie);
+        }
+
+        boolean exists = false;
+        for (std::vector<Actor*>::iterator it = actors.begin() ; it != actors.end(); ++it) {
+          if( actor_name == (*it)->actorName ) {
+            exists = true;
+          }
+        }
+        
+        //Our actor has not been found so we appropriately create its node   
+        if( !exists ) {
+          Actor* newActor = new Actor( actor_name );
+          actors.push_back( newActor );
+        }
             
-        bool exists = false;
+        /*bool exists = false;
             
         //is the movie we just processed already in our vector of movies?
         for (std::vector<Edge*>::iterator it = movies.begin() ; it != movies.end(); ++it) {
@@ -140,7 +167,7 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
                   newActor.edges.push_back(newMovie);
                 }
               }
-          }
+          }*/
     }
 
     if (!infile.eof()) {

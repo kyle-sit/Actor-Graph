@@ -30,6 +30,7 @@ protected:
 
 public:
     ActorGraph(void);
+    std::unordered_map<Edge, std::vector<Actor*>> connections;
     std::vector<Actor*> actors;
     std::vector<Edge*> movies;
 

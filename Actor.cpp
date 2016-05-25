@@ -1,27 +1,9 @@
-#ifndef ACTOR_HPP
-#define ACTOR_HPP
 
+#include "Actor.hpp"
+#include "Edge.hpp"
 #include <string>
 #include <vector>
 
 using namespace std;
 
-class Actor {
-
-  public:
-    string actorName;
-    bool visited;
-    int distance;
-    Actor * prevActor;
-    vector<Edge*> edges;
-
-    Actor(string actorName){
-      visited = false;
-      distance = 0;
-      this->actorName = actorName;
-      this->prevActor = nullptr;
-    }
-};
-
-#endif 
 
