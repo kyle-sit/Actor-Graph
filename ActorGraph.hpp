@@ -31,8 +31,9 @@ protected:
 
 public:
     ActorGraph(void);
-    vector<Actor*> actorVec;
-    std::set<string> movies;
+    std::set<Actor*> actors;
+    std::set<Edge*> uniqueMovies;
+    std::set<string> movieNames;
 
     // Maybe add some more methods here
   

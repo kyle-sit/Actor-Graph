@@ -8,9 +8,16 @@
 using namespace std;
 
 class Edge {
-	int weight;
-	string movieName;
-	int year;
-  std::vector<Actor*> listOfActors;
+  public:
+    int weight;
+	  string movieName;
+	  int year;
+    std::vector<Actor*> listOfActors;
+
+    Edge(string movieName) {
+      this.movieName = movieName;
+      weight = 0;
+      year = 0;
+    }
 };
 #endif
