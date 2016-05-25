@@ -22,14 +22,22 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
     
     //Check for header
     bool have_header = false;
-  
+ 
+    //Keep position in while loop
+    int pos = infile.beg;
+
     // keep reading lines until the end of file is reached
     while (infile) {
+        infile.seekg(0, pos);
+      
         string s;
     
         // get the next line
         if (!getline( infile, s )) break;
 
+        //save position
+        pos = infile.tellg();
+        
         if (!have_header) {
             // skip the header
             have_header = true;
@@ -58,9 +66,81 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
         int movie_year = stoi(record[2]);
     
         // we have an actor/movie relationship, now what?
-        if( *(movies.find(movie_title)) == movies.end() ){
-          movies.insert(movie_title);
+        Edge currMovie = Edge(movie_title, movie_year);
+            
+        bool exists = false;
+            
+        //is the movie we just processed already in our vector of movies?
+        for (std::vector<Edge*>::iterator it = movies.begin() ; it != movies.end(); ++it) {
+          if( currMovie == *(*it) ) {
+            exists = true;
+          }
         }
+
+        //movie is a unique movie
+        if( !exists ){
+          Edge* newMovie = new Edge(movie_title, movie_year);
+          movies.push_back(newMovie);
+          
+          //if our actor isn't in our set of strings, add it into our set
+          //and create a new Actor object from it and add to set of Actor *s
+          exists = false;
+          for (std::vector<Actor*>::iterator it = actors.begin() ; it != actors.end(); ++it) {
+            if( actor_name == (*it)->actorName ) {
+              exists = true;
+            }
+          }
+          
+          //Our actor has not been found so we appropriately create its node   
+          if( !exists ) {
+            Actor* newActor = new Actor( actor_name );
+            actors.push_back( newActor );
+            newMovie.listOfActors.push_back(newActor);
+            newActor.edges.push_back(newMovie);
+          }
+
+          while (infile) {
+            string s;
+ 
+            // get the next line
+            if (!getline( infile, s )) break;
+  
+            istringstream ss( s );
+            vector <string> record;
+  
+            while (ss) {
+              string next;
+      
+              // get the next string before hitting a tab character and put it in 'next'
+              if (!getline( ss, next, '\t' )) break;
+                record.push_back( next );
+              }
+  
+              if (record.size() != 3) {
+                //we should have exactly 3 columns
+                continue;
+              }
+ 
+              string actorName(record[0]);
+              string movieTitle(record[1]);
+              int movieYear = stoi(record[2]);
+          
+              if( movie_title == movieTitle && movie_year == movieYear) {
+                bool alsoExists = false;
+                for (std::vector<Actor*>::iterator it = actors.begin() ; it != actors.end(); ++it) {
+                  if( actorName == (*it)->actorName ) {
+                    alsoExists = true;
+                  }
+                }
+             
+                if( !alsoExists ) {
+                  Actor* newActor = new Actor( actorName );
+                  actors.push_back( newActor );
+                  newMovie.listOfActors.push_back(newActor);
+                  newActor.edges.push_back(newMovie);
+                }
+              }
+          }
     }
 
     if (!infile.eof()) {

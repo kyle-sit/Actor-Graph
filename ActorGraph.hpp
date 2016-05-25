@@ -18,7 +18,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <set>
 
 // Maybe include some data structures here
 
@@ -31,9 +30,8 @@ protected:
 
 public:
     ActorGraph(void);
-    std::set<Actor*> actors;
-    std::set<Edge*> uniqueMovies;
-    std::set<string> movieNames;
+    std::vector<Actor*> actors;
+    std::vector<Edge*> movies;
 
     // Maybe add some more methods here
   

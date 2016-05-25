@@ -17,7 +17,9 @@ public:
   std::vector<Edge*> edges;
 
 	Actor(string actorName) {
-		this->actorName = actorName;
+		visited = false;
+    distance = 0;
+    this->actorName = actorName;
 		this->prevActor = nullptr;
 	}
 };
