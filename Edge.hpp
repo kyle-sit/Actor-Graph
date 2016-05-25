@@ -12,19 +12,10 @@ class Edge {
     int weight;
 	  string movieName;
 	  int year;
-    std::vector<Actor*> listOfActors;
+    vector<Actor*> listOfActors;
 
-    Edge(string movieName, int year) {
-      this.movieName = movieName;
-      this. weight = 0;
-      this.year = year;
-    }
+    Edge(string movieName, int year); 
 
-    bool Edge::operator ==(const Edge& other) {
-      if (this.movieName == other.movieName && this.year == other.year)
-        return 1;
-      else
-        return 0;
-    }
+    bool operator ==(const Edge& other);
 };
 #endif

@@ -3,25 +3,20 @@
 
 #include <string>
 #include <vector>
-#include "Actor.hpp"
+#include "Edge.hpp"
 
 using namespace std;
 
 class Actor {
 
-public:
-	string actorName;
-	bool visited;
-	int distance;
-	Actor * prevActor;
-  std::vector<Edge*> edges;
+  public:
+    string actorName;
+    bool visited;
+    int distance;
+    Actor * prevActor;
+    vector<Edge*> edges;
 
-	Actor(string actorName) {
-		visited = false;
-    distance = 0;
-    this->actorName = actorName;
-		this->prevActor = nullptr;
-	}
+    Actor(string actorName);
 };
 
 #endif 
