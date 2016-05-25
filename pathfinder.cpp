@@ -6,9 +6,11 @@
  */
 
 #include "ActorGraph.hpp"
+#include "Edge.hpp"
+#include "Actor.hpp"
 #include <iostream>
-#include<fstream>
-#include<string>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -26,14 +28,24 @@ int main(int argc, char* argv[])
 
   //Check second argument first to avoid opening files
   bool weight = false;
-  switch( argv[2] ) {
-    case "-u" : weight = false;
+  if( *argv[2] == 'u' ) {
+    weight = false;
+  }
+  else if( *argv[2] == 'w' ) {
+    weight = true;
+  }
+  else {
+    cout << "Invalid second argument";
+    return -1;
+  }
+  /*switch( argv[2] ) {
+    case 'u' : weight = false;
                 break;
-    case "-w" : weight = true;
+    case 'w' : weight = true;
                 break;
     default: cout << "Invalid second argument";
              return -1;
-  }
+  }*/
 
 	//Open first file 
 	ifstream list;
