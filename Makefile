@@ -22,8 +22,6 @@ all: pathfinder
 
 pathfinder: ActorGraph.o
 
-
-
 # include what ever source code *.hpp files ActorGraph relies on (these are merely the ones that were used in the solution)
 
 # Note: you do not have to include a *.cpp file if it aleady has a paired *.hpp file that is already included with class/method headers
@@ -31,9 +29,9 @@ pathfinder: ActorGraph.o
 ActorGraph.o: Actor.o Edge.o ActorGraph.hpp
 #commented out UnionFind.hpp and Movie.hpp for now
 
-Actor.o: Actor.hpp Edge.hpp
+Actor.o: Actor.hpp
 
-Edge.o: Edge.hpp Actor.hpp
+Edge.o: Edge.hpp
 
 
 clean:

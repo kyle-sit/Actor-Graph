@@ -6,7 +6,7 @@ using namespace std;
 
 Edge::Edge(string movieName, int year) {
 		this.movieName = movieName;
-		this. weight = 0;
+		this. weight = 1 + (2015 - year);
 		this.year = year;
 }
 

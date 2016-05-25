@@ -1,7 +1,6 @@
 #ifndef EDGE_HPP
 #define EDGE_HPP
 
-#include "Actor.hpp"
 #include <vector>
 #include <string>
 
@@ -12,7 +11,6 @@ class Edge {
     int weight;
 	  string movieName;
 	  int year;
-    vector<Actor*> listOfActors;
 
     Edge(string movieName, int year); 
 
