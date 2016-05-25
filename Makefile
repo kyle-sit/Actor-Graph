@@ -31,9 +31,9 @@ pathfinder: ActorGraph.o
 ActorGraph.o: Actor.o Edge.o ActorGraph.hpp
 #commented out UnionFind.hpp and Movie.hpp for now
 
-Actor.o: Actor.hpp Edge.hpp
+Actor.o: Actor.hpp 
 
-Edge.o: Edge.hpp Actor.hpp
+Edge.o: Edge.hpp 
 
 
 clean:
