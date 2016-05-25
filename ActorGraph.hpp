@@ -14,7 +14,11 @@
 #include "Actor.hpp"
 #include "Edge.hpp"
 
+#include <vector>
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <set>
 
 // Maybe include some data structures here
 
@@ -27,8 +31,8 @@ protected:
 
 public:
     ActorGraph(void);
-    vector<Actor *> actorVec;
-    vector<Edge *> edgeVec;
+    vector<Actor*> actorVec;
+    std::set<string> movies;
 
     // Maybe add some more methods here
   
@@ -41,7 +45,7 @@ public:
      *
      * return true if file was loaded sucessfully, false otherwise
      */
-    bool loadFromFile(const char* in_filename, bool use_weighted_edges);
+    bool loadFromFile(ifstream infile, bool use_weighted_edges);
   
 };
 

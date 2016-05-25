@@ -3,13 +3,14 @@
 
 #include "Actor.hpp"
 #include <vector>
+#include <string>
 
 using namespace std;
 
 class Edge {
 	int weight;
-	int movieName;
+	string movieName;
 	int year;
-	vector<Actor *> listOfActors;
+  std::vector<Actor*> listOfActors;
 };
 #endif

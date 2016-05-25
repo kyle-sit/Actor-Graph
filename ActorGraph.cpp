@@ -18,10 +18,9 @@ using namespace std;
 
 ActorGraph::ActorGraph(void) {}
 
-bool ActorGraph::loadFromFile(const char* in_filename, bool use_weighted_edges) {
-    // Initialize the file stream
-    ifstream infile(in_filename);
-
+bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
+    
+    //Check for header
     bool have_header = false;
   
     // keep reading lines until the end of file is reached
@@ -59,6 +58,9 @@ bool ActorGraph::loadFromFile(const char* in_filename, bool use_weighted_edges) 
         int movie_year = stoi(record[2]);
     
         // we have an actor/movie relationship, now what?
+        if( *(movies.find(movie_title)) == movies.end() ){
+          movies.insert(movie_title);
+        }
     }
 
     if (!infile.eof()) {
