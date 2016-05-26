@@ -78,7 +78,8 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
         // we have an actor/movie relationship, now what?
         Edge currMovie = Edge(movie_title, movie_year);
-       
+      
+        cout << "iterate through edges" << "\n";
         std::vector<Edge*>::iterator it;
         //is the movie we just processed already in our vector of movies?
         for (it = movies.begin(); it != movies.end(); ++it) {
@@ -89,13 +90,14 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
         //Two cases if movie is new and if it is not new
         if( it == movies.end() ) {
+          cout << "unique movie found" << "\n";
           //Allocate new edge and push it to global list
           Edge* newMovie = new Edge(movie_title, movie_year);
           movies.push_back(newMovie);
           
           //Check if associated actor is new
           std::vector<Actor*>::iterator it2;
-          for(it2 = actors.begin(); it2 != actors.end(); ++it) {
+          for(it2 = actors.begin(); it2 != actors.end(); ++it2) {
             if( actor_name == (*it2)->actorName ) {
               break;
             }
@@ -103,6 +105,7 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
           //Two cases if actor is new and if it is not new
           if( it2 == actors.end() ) {
+            cout << "unique actor found" << "\n";
             Actor* newActor = new Actor(actor_name);
             actors.push_back(newActor);
             connections[newMovie].push_back(newActor);
@@ -110,15 +113,17 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
           }
           //Actor is not new
           else {
+            cout << "actor is not unique" << "\n";
             connections[newMovie].push_back(*it2);
             ((*it2)->edges).push_back(newMovie);
           }
         }
         //movie is not new
         else{
+          cout << "movie is not new" << "\n";
           //Check if associated actor is new
           std::vector<Actor*>::iterator it2;
-          for(it2 = actors.begin(); it2 != actors.end(); ++it) {
+          for(it2 = actors.begin(); it2 != actors.end(); ++it2) {
             if( actor_name == (*it2)->actorName ) {
               break;
             }
@@ -126,6 +131,7 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
           //Two cases if actor is new and if it is not new
           if( it2 == actors.end() ) {
+            cout << "unique actor found" << "\n";
             Actor* newActor = new Actor(actor_name);
             actors.push_back(newActor);
             connections[*it].push_back(newActor);
@@ -133,6 +139,7 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
           }
           //Actor is not new
           else {
+            cout << "actor is not unique" << "\n";
             connections[*it].push_back(*it2);
             ((*it2)->edges).push_back(*it);
           }

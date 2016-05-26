@@ -87,6 +87,17 @@ int main(int argc, char* argv[])
   ActorGraph myGraph;
   bool loaded = myGraph.loadFromFile(argv[1], weight);
 
+  
+  std::vector<Actor*>::iterator it;
+  for(it = myGraph.actors.begin(); it != myGraph.actors.end(); ++it) {
+    cout << (*it)->actorName << "\n";
+  }
+
+  std::vector<Edge*>::iterator it2;
+  for(it2 = myGraph.movies.begin(); it2 != myGraph.movies.end(); ++it2) {
+    cout << (*it2)->movieName << "\n";
+  }
+  
   //load failed
   if( !loaded ) {
     pairs.close();
