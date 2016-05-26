@@ -1,8 +1,8 @@
 # A simple makefile for CSE 100 PA4
 
 CC=g++
-CXXFLAGS=-std=c++11
-LDFLAGS=
+CXXFLAGS= -std=c++11 -g -Wall -gdwarf-3
+LDFLAGS=-g
 
 # if passed "type=opt" at command-line, compile with "-O3" flag (otherwise use "-g" for debugging)
 

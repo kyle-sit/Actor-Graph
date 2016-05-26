@@ -47,17 +47,6 @@ int main(int argc, char* argv[])
              return -1;
   }*/
 
-	//Open first file 
-	ifstream list;
-	list.open(argv[1], ios::binary);
-
-	//Check if input file was actually opened
-	if(!list.is_open()) 
-	{
-		cout<< "Invalid first input file. No file was opened. Please try again.\n";
-		return -1;
-	}
-
 	//Open second file 
 	ifstream pairs;
 	pairs.open(argv[3], ios::binary);
@@ -65,7 +54,6 @@ int main(int argc, char* argv[])
 	//Check if input file was actually opened
 	if(!pairs.is_open()) 
 	{
-		list.close();
     cout<< "Invalid first input file. No file was opened. Please try again.\n";
 		return -1;
 	}
@@ -77,21 +65,8 @@ int main(int argc, char* argv[])
 	//Check if input file was actually opened
 	if(!out.is_open()) 
 	{
-		list.close();
     pairs.close();
     cout<< "Invalid first input file. No file was opened. Please try again.\n";
-		return -1;
-	}
-
-	//Check for empty file
-	list.seekg(0, ios_base::end); 
-	unsigned int len = list.tellg();
-	if(len==0) 
-	{
-		list.close();
-    pairs.close();
-    out.close();
-    cout << "The first input file is empty. \n";
 		return -1;
 	}
 
@@ -100,7 +75,6 @@ int main(int argc, char* argv[])
 	unsigned int len2 = pairs.tellg();
 	if(len2==0) 
 	{
-		list.close();
     pairs.close();
     out.close();
     cout << "The second input file is empty. \n";
@@ -108,12 +82,19 @@ int main(int argc, char* argv[])
 	}
 	
   //Resets the stream to beginning of file
-	list.seekg(0, ios_base::beg);
   pairs.seekg(0, ios_base::beg);
 
+  ActorGraph myGraph;
+  bool loaded = myGraph.loadFromFile(argv[1], weight);
+
+  //load failed
+  if( !loaded ) {
+    pairs.close();
+    out.close();
+    return -1;
+  }
 
   //Close files and return
-  list.close();
   pairs.close();
   out.close();
   return 1;

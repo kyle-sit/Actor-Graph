@@ -23,8 +23,10 @@ using namespace std;
 
 ActorGraph::ActorGraph() {}
 
-bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
+bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
     
+    ifstream infile(file_name);    
+
     //Check for header
     bool have_header = false;
  
@@ -33,6 +35,7 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
 
     // keep reading lines until the end of file is reached
     while (infile) {
+        cout << "Enter while loop" << "\n";
         infile.seekg(0, pos);
       
         string s;
@@ -53,23 +56,26 @@ bool ActorGraph::loadFromFile(ifstream infile, bool use_weighted_edges) {
         vector <string> record;
 
         while (ss) {
-            string next;
+          cout << "Enter second while loop" << "\n";  
+          string next;
       
-            // get the next string before hitting a tab character and put it in 'next'
-            if (!getline( ss, next, '\t' )) break;
+          // get the next string before hitting a tab character and put it in 'next'
+          if (!getline( ss, next, '\t' )) break;
 
-            record.push_back( next );
+          record.push_back( next );
         }
     
         if (record.size() != 3) {
-            // we should have exactly 3 columns
-            continue;
+          // we should have exactly 3 columns
+          continue;
         }
 
         string actor_name(record[0]);
         string movie_title(record[1]);
         int movie_year = stoi(record[2]);
     
+        cout << "Starting our algorithm" << "\n";
+
         // we have an actor/movie relationship, now what?
         Edge currMovie = Edge(movie_title, movie_year);
        

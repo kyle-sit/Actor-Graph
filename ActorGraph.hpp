@@ -43,7 +43,7 @@ public:
      *
      * return true if file was loaded sucessfully, false otherwise
      */
-    bool loadFromFile(ifstream infile, bool use_weighted_edges);
+    bool loadFromFile(const char* file_name, bool use_weighted_edges);
   
 };
 
