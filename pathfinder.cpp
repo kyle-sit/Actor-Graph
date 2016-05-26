@@ -47,53 +47,29 @@ int main(int argc, char* argv[])
              return -1;
   }*/
 
-	//Open second file 
-	ifstream pairs;
-	pairs.open(argv[3], ios::binary);
-
-	//Check if input file was actually opened
-	if(!pairs.is_open()) 
-	{
-    cout<< "Invalid first input file. No file was opened. Please try again.\n";
-		return -1;
-	}
-	
-  //Open output file 
-	ofstream out;
-	out.open(argv[4], ios::binary);
-
-	//Check if input file was actually opened
-	if(!out.is_open()) 
-	{
-    pairs.close();
-    cout<< "Invalid first input file. No file was opened. Please try again.\n";
-		return -1;
-	}
-
-	//Check for empty file
-	pairs.seekg(0, ios_base::end); 
-	unsigned int len2 = pairs.tellg();
-	if(len2==0) 
-	{
-    pairs.close();
-    out.close();
-    cout << "The second input file is empty. \n";
-		return -1;
-	}
-	
-  //Resets the stream to beginning of file
-  pairs.seekg(0, ios_base::beg);
-
   ActorGraph myGraph;
   bool loaded = myGraph.loadFromFile(argv[1], weight);
 
-  std::vector<Actor*>::iterator it;
-  for(it = myGraph.actors.begin(); it != myGraph.actors.end(); ++it) {
+  if( !loaded ) {
+    cout << "Failed to load graph" << "\n";
+    return -1;
+  }
+
+  bool search = false;
+  if( !weight ) {
+     search = BreadthFirstSearch(argv[3], argv[4]); 
+  }
+  else {
+  //djikstras
+  }
+
+  std::set<Actor*>::iterator it;
+  for(it = myGraph.actorSet.begin(); it != myGraph.actorSet.end(); ++it) {
     cout << (*it)->actorName << "\n";
   }
 
-  std::vector<Edge*>::iterator it2;
-  for(it2 = myGraph.movies.begin(); it2 != myGraph.movies.end(); ++it2) {
+  std::set<Edge*>::iterator it2;
+  for(it2 = myGraph.movieSet.begin(); it2 != myGraph.movieSet.end(); ++it2) {
     cout << (*it2)->movieName << "\n";
   }
   
@@ -106,15 +82,5 @@ int main(int argc, char* argv[])
     }
   }
 
-  //load failed
-  if( !loaded ) {
-    pairs.close();
-    out.close();
-    return -1;
-  }
-
-  //Close files and return
-  pairs.close();
-  out.close();
   return 1;
 }

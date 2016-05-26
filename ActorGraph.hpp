@@ -13,7 +13,8 @@
 
 #include "Actor.hpp"
 #include "Edge.hpp"
-#include <vector>
+//#include <vector>
+#include <set>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -29,8 +30,10 @@ protected:
 public:
     ActorGraph(void);
     std::unordered_map<Edge*, std::vector<Actor*>> connections;
-    std::vector<Actor*> actors;
-    std::vector<Edge*> movies;
+    //std::vector<Actor*> actors;
+    //std::vector<Edge*> movies;
+    std::set<Actor*> actorSet;
+    std::set<Edge*> movieSet;
 
     // Maybe add some more methods here
   
@@ -44,7 +47,8 @@ public:
      * return true if file was loaded sucessfully, false otherwise
      */
     bool loadFromFile(const char* file_name, bool use_weighted_edges);
-  
+    
+    bool BreadthFirstSearch(const char* pairs_file, const char* out_file);
 };
 
 

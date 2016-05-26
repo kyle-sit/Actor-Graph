@@ -25,18 +25,22 @@ ActorGraph::ActorGraph() {}
 
 bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
     
+    //Two vectors used
+    std::vector<Actor*> actors;
+    std::vector<Edge*> movies;
+    
     ifstream infile(file_name);    
 
     //Check for header
     bool have_header = false;
  
     //Keep position in while loop
-    std::ios_base::seekdir pos = infile.beg; 
+    //std::ios_base::seekdir pos = infile.beg; 
 
     // keep reading lines until the end of file is reached
     while (infile) {
         cout << "Enter while loop" << "\n";
-        infile.seekg(0, pos);
+        //infile.seekg(0, pos);
       
         string s;
     
@@ -44,7 +48,7 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
         if (!getline( infile, s )) break;
 
         //save position
-        pos = infile.cur;
+        //pos = infile.cur;
         
         if (!have_header) {
             // skip the header
@@ -149,6 +153,14 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
         }
     }
 
+    //Move pointers to set
+    for(std::vector<Edge*>::iterator toSet = movies.begin(); toSet != movies.end(); ++toSet) {
+      movieSet.insert(*toSet);
+    }
+    for(std::vector<Actor*>::iterator toSet2 = actors.begin(); toSet2 != actors.end(); ++toSet2) {
+      actorSet.insert(*toSet2);
+    }
+
     if (!infile.eof()) {
         cerr << "Failed to read " << infile << "!\n";
         return false;
@@ -157,3 +169,52 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
     return true;
 }
+
+
+bool BreadthFirstSearch(const char* pairs_file, const char* out_file) {
+    ifstream infile(pairs_file);
+    ofstream outfile(out_file);
+  
+    //Check for header
+    bool have_header = false;
+ 
+    //Keep position in while loop
+    std::ios_base::seekdir pos = infile.beg; 
+
+    // keep reading lines until the end of file is reached
+    while (infile) {
+        cout << "Enter pairs loop" << "\n";
+        string s;
+    
+        // get the next line
+        if (!getline( infile, s )) break;
+
+        if (!have_header) {
+            // skip the header
+            have_header = true;
+            continue;
+        }
+
+        istringstream ss( s );
+        vector <string> record;
+
+        while (ss) {
+          cout << "Enter second pairs loop" << "\n";  
+          string next;
+      
+          // get the next string before hitting a tab character and put it in 'next'
+          if (!getline( ss, next, '\t' )) break;
+
+          record.push_back( next );
+        }
+    
+        if (record.size() != 2) {
+          // we should have exactly 3 columns
+          continue;
+        }
+
+        string actor_one(record[0]);
+        string actor_two(record[1]);
+}
+
+
