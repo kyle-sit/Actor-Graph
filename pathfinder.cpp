@@ -57,10 +57,15 @@ int main(int argc, char* argv[])
 
   bool search = false;
   if( !weight ) {
-     search = BreadthFirstSearch(argv[3], argv[4]); 
+     search = myGraph.BreadthFirstSearch(argv[3], argv[4]); 
   }
   else {
   //djikstras
+  }
+
+  if( !search ) {
+    cout << "Failed to search for pairs" << "\n";
+    return -1;
   }
 
   std::vector<Actor*>::iterator it;

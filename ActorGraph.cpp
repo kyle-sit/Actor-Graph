@@ -221,7 +221,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
         std::vector<Actor*>::iterator it;
         //Set all nodes distance to 0 and visited to false
         for(it = actors.begin(); it != actors.end(); ++it) {
-          (*it)->visited = false;
+          //(*it)->visited = false;
           (*it)->distance = 0;
         }
         //find root node
@@ -236,10 +236,20 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
         explore.push(root);
         while( !explore.empty() ) {
           Actor* next = explore.front();
-          exlpore.pop();
-
+          explore.pop();
+          std::vector<Edge*>::iterator edgeIt;
+          for(edgeIt = (next->edges).begin(); edgeIt != (next->edges).end(); ++edgeIt) {
+            for(it = (connections[*edgeIt]).begin(); it != (connections[*edgeIt]).end(); it++) {
+              if( next->distance + 1 < (*it)->distance ) {
+                (*it)->distance = next->distance + 1;
+                (*it)->prevActor = next;
+                explore.push(*it);
+              }
+            }
+          }
         }
     }
+    return true;
 }
 
 
