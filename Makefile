@@ -26,6 +26,7 @@ pathfinder: ActorGraph.o
 
 Edge.o: Edge.hpp
 
+
 Actor.o: Actor.hpp
 
 ActorGraph.o: Edge.o Actor.o ActorGraph.hpp

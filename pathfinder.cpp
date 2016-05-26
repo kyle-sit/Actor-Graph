@@ -87,7 +87,6 @@ int main(int argc, char* argv[])
   ActorGraph myGraph;
   bool loaded = myGraph.loadFromFile(argv[1], weight);
 
-  
   std::vector<Actor*>::iterator it;
   for(it = myGraph.actors.begin(); it != myGraph.actors.end(); ++it) {
     cout << (*it)->actorName << "\n";
@@ -98,6 +97,15 @@ int main(int argc, char* argv[])
     cout << (*it2)->movieName << "\n";
   }
   
+  //Print out unordered map stuff
+  for ( auto it = myGraph.connections.begin(); it != myGraph.connections.end(); ++it) {
+    cerr << "Edge Movie Title Name: " << it->first->movieName << endl;
+    cerr << "Actors Are: ";
+    for (auto actorIt = it->second.begin(); actorIt != it->second.end(); ++actorIt) {
+      cerr << endl << (*actorIt)->actorName << endl;
+    }
+  }
+
   //load failed
   if( !loaded ) {
     pairs.close();

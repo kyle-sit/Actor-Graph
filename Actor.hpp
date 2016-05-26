@@ -16,7 +16,12 @@ class Actor {
     Actor* prevActor;
     vector<Edge*> edges;
 
-    Actor(string actorName);
+    Actor(string actorName){
+      visited = false;
+      distance = 0;
+      this->actorName = actorName;
+      this->prevActor = nullptr;
+    }
 };
 
 #endif 

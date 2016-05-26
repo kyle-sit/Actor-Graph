@@ -88,9 +88,12 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
           }
         }
 
+        cerr << "Post for loop";
+
         //Two cases if movie is new and if it is not new
         if( it == movies.end() ) {
           cout << "unique movie found" << "\n";
+          
           //Allocate new edge and push it to global list
           Edge* newMovie = new Edge(movie_title, movie_year);
           movies.push_back(newMovie);
