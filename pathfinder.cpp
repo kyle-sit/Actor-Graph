@@ -63,13 +63,13 @@ int main(int argc, char* argv[])
   //djikstras
   }
 
-  std::set<Actor*>::iterator it;
-  for(it = myGraph.actorSet.begin(); it != myGraph.actorSet.end(); ++it) {
+  std::vector<Actor*>::iterator it;
+  for(it = myGraph.actors.begin(); it != myGraph.actors.end(); ++it) {
     cout << (*it)->actorName << "\n";
   }
 
-  std::set<Edge*>::iterator it2;
-  for(it2 = myGraph.movieSet.begin(); it2 != myGraph.movieSet.end(); ++it2) {
+  std::vector<Edge*>::iterator it2;
+  for(it2 = myGraph.movies.begin(); it2 != myGraph.movies.end(); ++it2) {
     cout << (*it2)->movieName << "\n";
   }
   

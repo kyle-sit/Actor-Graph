@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <queue>
 #include "Edge.cpp"
 #include "Actor.cpp"
 #include "Actor.hpp"
@@ -26,8 +27,8 @@ ActorGraph::ActorGraph() {}
 bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
     
     //Two vectors used
-    std::vector<Actor*> actors;
-    std::vector<Edge*> movies;
+    //std::vector<Actor*> actors;
+    //std::vector<Edge*> movies;
     
     ifstream infile(file_name);    
 
@@ -153,13 +154,13 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
         }
     }
 
-    //Move pointers to set
+    /*//Move pointers to set
     for(std::vector<Edge*>::iterator toSet = movies.begin(); toSet != movies.end(); ++toSet) {
       movieSet.insert(*toSet);
     }
     for(std::vector<Actor*>::iterator toSet2 = actors.begin(); toSet2 != actors.end(); ++toSet2) {
       actorSet.insert(*toSet2);
-    }
+    }*/
 
     if (!infile.eof()) {
         cerr << "Failed to read " << infile << "!\n";
@@ -171,7 +172,7 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 }
 
 
-bool BreadthFirstSearch(const char* pairs_file, const char* out_file) {
+bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file) {
     ifstream infile(pairs_file);
     ofstream outfile(out_file);
   
@@ -179,7 +180,7 @@ bool BreadthFirstSearch(const char* pairs_file, const char* out_file) {
     bool have_header = false;
  
     //Keep position in while loop
-    std::ios_base::seekdir pos = infile.beg; 
+    //std::ios_base::seekdir pos = infile.beg; 
 
     // keep reading lines until the end of file is reached
     while (infile) {
@@ -215,6 +216,30 @@ bool BreadthFirstSearch(const char* pairs_file, const char* out_file) {
 
         string actor_one(record[0]);
         string actor_two(record[1]);
+
+        queue<Actor*> explore;
+        std::vector<Actor*>::iterator it;
+        //Set all nodes distance to 0 and visited to false
+        for(it = actors.begin(); it != actors.end(); ++it) {
+          (*it)->visited = false;
+          (*it)->distance = 0;
+        }
+        //find root node
+        Actor* root;
+        for(it = actors.begin(); it != actors.end(); ++it) {
+          if( actor_one == (*it)->actorName ) {
+            root = *it;
+            break;
+          }
+        } 
+
+        explore.push(root);
+        while( !explore.empty() ) {
+          Actor* next = explore.front();
+          exlpore.pop();
+
+        }
+    }
 }
 
 
