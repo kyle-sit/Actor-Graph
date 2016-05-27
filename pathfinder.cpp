@@ -50,6 +50,9 @@ int main(int argc, char* argv[])
   ActorGraph myGraph;
   bool loaded = myGraph.loadFromFile(argv[1], weight);
 
+  retraceGraph(argv[3], argv[4], myGraph.actors);
+  
+
   if( !loaded ) {
     cout << "Failed to load graph" << "\n";
     return -1;
@@ -62,6 +65,7 @@ int main(int argc, char* argv[])
   else {
   //djikstras
   }
+
 
   std::vector<Actor*>::iterator it;
   for(it = myGraph.actors.begin(); it != myGraph.actors.end(); ++it) {

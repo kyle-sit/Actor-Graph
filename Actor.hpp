@@ -14,6 +14,7 @@ class Actor {
     bool visited;
     int distance;
     Actor* prevActor;
+    Edge* prevMovie;
     vector<Edge*> edges;
 
     Actor(string actorName){

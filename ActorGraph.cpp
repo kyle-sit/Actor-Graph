@@ -20,6 +20,10 @@
 #include "Edge.hpp"
 #include "ActorGraph.hpp"
 
+#define HYPHENS "--"
+#define FINAL_ARROW "-->"
+#define HEADER "(actor)--[movie#@year]-->(actor)--..."
+
 using namespace std;
 
 ActorGraph::ActorGraph() {}
@@ -174,7 +178,6 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
 bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file) {
     ifstream infile(pairs_file);
-    ofstream outfile(out_file);
   
     //Check for header
     bool have_header = false;
@@ -237,9 +240,46 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
         while( !explore.empty() ) {
           Actor* next = explore.front();
           exlpore.pop();
-
         }
+
+        for (auto secondit = actors.begin(); secondit != actors.end(); ++secondit) {
+          if (*secondit->actorName == secondActor) {
+            break;
+          }
+        }
+
+        retraceActor(root, *secondit, const char * outfilename);
     }
+}
+
+static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
+
+  ofstream outfile(outfilename);
+
+  outfile << HEADER << "\n";
+
+  std::vector<string> actorPath;
+  std::vector<string> moviePath;
+
+  Actor* tempA = last;
+  Edge* tempM;
+  
+  actorPath.push_back(tempA->actorName);
+
+  while (tempA->prevActor) {
+    tempA = tempA->prevActor;
+    tempM = tempA->prevMovie;
+    actorPath.push_back(tempA->actorName);
+    moviePath.push_back(tempM->movieName);
+  }
+
+  if( tempA != root ) {
+    outfile << "9999" << "\n";
+  }
+  else {
+    
+  }
+
 }
 
 
