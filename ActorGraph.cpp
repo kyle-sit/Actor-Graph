@@ -174,7 +174,6 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
 bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file) {
     ifstream infile(pairs_file);
-    ofstream outfile(out_file);
   
     //Check for header
     bool have_header = false;
@@ -243,6 +242,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
               if( next->distance + 1 < (*it)->distance ) {
                 (*it)->distance = next->distance + 1;
                 (*it)->prevActor = next;
+                (*it)->prevMovie = *edgeIt;
                 explore.push(*it);
               }
             }
