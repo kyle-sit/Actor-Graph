@@ -342,7 +342,7 @@ static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
          //last node, need special print 
         if ((unsigned int)i + 1 == actorPath.size()) {
           outfile << FINAL_ARROW;
-          outfile << "(" << *rActorIt << ")";
+          outfile << "(" << *rActorIt << ")" << endl;
           return 1;
          }
          outfile  << HYPHENS;
