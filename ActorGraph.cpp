@@ -18,6 +18,7 @@
 #include "Actor.cpp"
 #include "Actor.hpp"
 #include "Edge.hpp"
+#include <sstream>
 #include "ActorGraph.hpp"
 
 #define HYPHENS "--"
@@ -232,6 +233,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
             break;
           }
         } 
+        /*
         explore.push(root);
         while( !explore.empty() ) {
           Actor* next = explore.front();
@@ -248,12 +250,37 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
             }
           }
         }
-       
+       */
        //it = explore[1];
+       //
 
+        explore.push(root);
+        while( !explore.empty() ) {
+          Actor* next = explore.front();
+          explore.pop();
+          //FIX: when you pop you have to visit
+          next->visited = true;
+          std::vector<Edge*>::iterator edgeIt;
+          for(edgeIt = (next->edges).begin(); edgeIt != (next->edges).end(); ++edgeIt) {
+            for(it = (connections[*edgeIt]).begin(); it != (connections[*edgeIt]).end(); it++) {
+       //FIX: Was never pushing exploring any nodes because if condition to
+       //enter loop was never true. changed so the distance check is only
+       //performed when we know this is the node's second time getting updated      
+              if( (*it)->visited == false) {
+                if ((*it)->distance != 0) {
+                  if ((next->distance + 1) >= (*it)->distance) {
+                    continue;
+                  }
+                }
+                (*it)->distance = next->distance + 1;
+                (*it)->prevActor = next;
+                (*it)->prevMovie = *edgeIt;
+                explore.push(*it);
+              }
+            }
+         }
+       }
        bool pathFound = retraceActor(root, last, out_file);
-       cerr << "Looking for " << root->actorName << "and " << last->actorName << endl;
-       cerr << "Outfile is " << out_file << endl;
        if (!pathFound) {
         return false;
        }
@@ -272,14 +299,22 @@ static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
 
   Actor* tempA = last;
   Edge* tempM;
-  
-  actorPath.push_back(tempA->actorName);
+  string movieYear;
 
-  while (tempA->prevActor) {
-    tempA = tempA->prevActor;
-    tempM = tempA->prevMovie;
+//FIX: was never pushing root node onto actor list, and the roots prevMovie was
+//getting pushed when it didn't have one
+  while (tempA) {
     actorPath.push_back(tempA->actorName);
+    if (tempA == root) {
+      break;
+    }
+    tempM = tempA->prevMovie;
+    movieYear = "";
+    movieYear = to_string(tempM->year);
+    moviePath.push_back(movieYear);
     moviePath.push_back(tempM->movieName);
+
+    tempA = tempA->prevActor;
   }
 
   if( tempA != root ) {
@@ -287,19 +322,31 @@ static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
     return 0;
   }
   else {
+    auto rActorIt = actorPath.rbegin();
+    auto rMovieIt = moviePath.rbegin();
     for (int i = 1;(unsigned int) i <=  actorPath.size(); i++) {
-      for (auto rActorIt = actorPath.rbegin(); rActorIt != actorPath.rend(); ++i) {
         //final actor, print special arrows
-        if ((unsigned int)i == actorPath.size()) {
-          outfile << FINAL_ARROW;
+        if (rActorIt != actorPath.rend()) {
+          outfile << "(" << *rActorIt << ")";
         }
-        outfile << "(" << *rActorIt << ")";
+        rActorIt++;
+   
+        outfile  << HYPHENS;
+         outfile << "[" << *rMovieIt;
+         outfile << "#@";
 
-      }
-      outfile << HYPHENS;
-      for (auto rMovieIt = moviePath.rbegin(); rMovieIt != moviePath.rend(); ++i) {
-        outfile << "[" << *rMovieIt << "]";
-      }
+         rMovieIt++;
+         outfile << *rMovieIt << "]";
+         rMovieIt++;
+         
+         //last node, need special print 
+        if ((unsigned int)i + 1 == actorPath.size()) {
+          outfile << FINAL_ARROW;
+          outfile << "(" << *rActorIt << ")";
+          return 1;
+         }
+         outfile  << HYPHENS;
+        
     }
   }
   return 1;
