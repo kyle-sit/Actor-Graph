@@ -26,6 +26,8 @@
 
 using namespace std;
 
+
+static bool retraceActor(Actor * root, Actor * last, const char * outfilename);
 ActorGraph::ActorGraph() {}
 
 bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
@@ -44,7 +46,6 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
     // keep reading lines until the end of file is reached
     while (infile) {
-        cout << "Enter while loop" << "\n";
         //infile.seekg(0, pos);
       
         string s;
@@ -65,7 +66,6 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
         vector <string> record;
 
         while (ss) {
-          cout << "Enter second while loop" << "\n";  
           string next;
       
           // get the next string before hitting a tab character and put it in 'next'
@@ -83,12 +83,10 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
         string movie_title(record[1]);
         int movie_year = stoi(record[2]);
     
-        cout << "Starting our algorithm" << "\n";
 
         // we have an actor/movie relationship, now what?
         Edge currMovie = Edge(movie_title, movie_year);
       
-        cout << "iterate through edges" << "\n";
         std::vector<Edge*>::iterator it;
         //is the movie we just processed already in our vector of movies?
         for (it = movies.begin(); it != movies.end(); ++it) {
@@ -97,11 +95,9 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
           }
         }
 
-        cerr << "Post for loop";
 
         //Two cases if movie is new and if it is not new
         if( it == movies.end() ) {
-          cout << "unique movie found" << "\n";
           
           //Allocate new edge and push it to global list
           Edge* newMovie = new Edge(movie_title, movie_year);
@@ -117,7 +113,6 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
           //Two cases if actor is new and if it is not new
           if( it2 == actors.end() ) {
-            cout << "unique actor found" << "\n";
             Actor* newActor = new Actor(actor_name);
             actors.push_back(newActor);
             connections[newMovie].push_back(newActor);
@@ -125,14 +120,12 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
           }
           //Actor is not new
           else {
-            cout << "actor is not unique" << "\n";
             connections[newMovie].push_back(*it2);
             ((*it2)->edges).push_back(newMovie);
           }
         }
         //movie is not new
         else{
-          cout << "movie is not new" << "\n";
           //Check if associated actor is new
           std::vector<Actor*>::iterator it2;
           for(it2 = actors.begin(); it2 != actors.end(); ++it2) {
@@ -143,7 +136,6 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
           //Two cases if actor is new and if it is not new
           if( it2 == actors.end() ) {
-            cout << "unique actor found" << "\n";
             Actor* newActor = new Actor(actor_name);
             actors.push_back(newActor);
             connections[*it].push_back(newActor);
@@ -151,7 +143,6 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
           }
           //Actor is not new
           else {
-            cout << "actor is not unique" << "\n";
             connections[*it].push_back(*it2);
             ((*it2)->edges).push_back(*it);
           }
@@ -187,7 +178,6 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
 
     // keep reading lines until the end of file is reached
     while (infile) {
-        cout << "Enter pairs loop" << "\n";
         string s;
     
         // get the next line
@@ -203,7 +193,6 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
         vector <string> record;
 
         while (ss) {
-          cout << "Enter second pairs loop" << "\n";  
           string next;
       
           // get the next string before hitting a tab character and put it in 'next'
@@ -224,7 +213,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
         std::vector<Actor*>::iterator it;
         //Set all nodes distance to 0 and visited to false
         for(it = actors.begin(); it != actors.end(); ++it) {
-          (*it)->visited = false;
+          //(*it)->visited = false;
           (*it)->distance = 0;
         }
         //find root node
@@ -236,27 +225,47 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
           }
         } 
 
+        Actor* last;
+        for(auto secondIt = actors.begin(); secondIt != actors.end(); ++secondIt) {
+          if( actor_two == (*secondIt)->actorName ) {
+            last  = *secondIt;
+            break;
+          }
+        } 
         explore.push(root);
         while( !explore.empty() ) {
           Actor* next = explore.front();
-          exlpore.pop();
-        }
-
-        for (auto secondit = actors.begin(); secondit != actors.end(); ++secondit) {
-          if (*secondit->actorName == secondActor) {
-            break;
+          explore.pop();
+          std::vector<Edge*>::iterator edgeIt;
+          for(edgeIt = (next->edges).begin(); edgeIt != (next->edges).end(); ++edgeIt) {
+            for(it = (connections[*edgeIt]).begin(); it != (connections[*edgeIt]).end(); it++) {
+              if( next->distance + 1 < (*it)->distance ) {
+                (*it)->distance = next->distance + 1;
+                (*it)->prevActor = next;
+                (*it)->prevMovie = *edgeIt;
+                explore.push(*it);
+              }
+            }
           }
         }
+       
+       //it = explore[1];
 
-        retraceActor(root, *secondit, const char * outfilename);
+       bool pathFound = retraceActor(root, last, out_file);
+       cerr << "Looking for " << root->actorName << "and " << last->actorName << endl;
+       cerr << "Outfile is " << out_file << endl;
+       if (!pathFound) {
+        return false;
+       }
     }
+    return true;
 }
 
 static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
 
   ofstream outfile(outfilename);
 
-  outfile << HEADER << "\n";
+  outfile << HEADER << endl;
 
   std::vector<string> actorPath;
   std::vector<string> moviePath;
@@ -275,11 +284,25 @@ static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
 
   if( tempA != root ) {
     outfile << "9999" << "\n";
+    return 0;
   }
   else {
-    
-  }
+    for (int i = 1;(unsigned int) i <=  actorPath.size(); i++) {
+      for (auto rActorIt = actorPath.rbegin(); rActorIt != actorPath.rend(); ++i) {
+        //final actor, print special arrows
+        if ((unsigned int)i == actorPath.size()) {
+          outfile << FINAL_ARROW;
+        }
+        outfile << "(" << *rActorIt << ")";
 
+      }
+      outfile << HYPHENS;
+      for (auto rMovieIt = moviePath.rbegin(); rMovieIt != moviePath.rend(); ++i) {
+        outfile << "[" << *rMovieIt << "]";
+      }
+    }
+  }
+  return 1;
 }
 
 

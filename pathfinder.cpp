@@ -50,34 +50,26 @@ int main(int argc, char* argv[])
   ActorGraph myGraph;
   bool loaded = myGraph.loadFromFile(argv[1], weight);
 
-  retraceGraph(argv[3], argv[4], myGraph.actors);
-  
 
   if( !loaded ) {
     cout << "Failed to load graph" << "\n";
     return -1;
   }
-
   bool search = false;
   if( !weight ) {
-     search = BreadthFirstSearch(argv[3], argv[4]); 
+     search = myGraph.BreadthFirstSearch(argv[3], argv[4]); 
   }
   else {
   //djikstras
   }
 
-
-  std::vector<Actor*>::iterator it;
-  for(it = myGraph.actors.begin(); it != myGraph.actors.end(); ++it) {
-    cout << (*it)->actorName << "\n";
-  }
-
-  std::vector<Edge*>::iterator it2;
-  for(it2 = myGraph.movies.begin(); it2 != myGraph.movies.end(); ++it2) {
-    cout << (*it2)->movieName << "\n";
+  if( !search ) {
+    cout << "Failed to search for pairs" << "\n";
+    return -1;
   }
   
   //Print out unordered map stuff
+  /* Printing out unordered map test
   for ( auto it = myGraph.connections.begin(); it != myGraph.connections.end(); ++it) {
     cerr << "Edge Movie Title Name: " << it->first->movieName << endl;
     cerr << "Actors Are: ";
@@ -85,6 +77,6 @@ int main(int argc, char* argv[])
       cerr << endl << (*actorIt)->actorName << endl;
     }
   }
-
+*/
   return 1;
 }
