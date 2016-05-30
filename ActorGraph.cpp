@@ -325,28 +325,26 @@ static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
     auto rActorIt = actorPath.rbegin();
     auto rMovieIt = moviePath.rbegin();
     for (int i = 1;(unsigned int) i <=  actorPath.size(); i++) {
-        //final actor, print special arrows
-        if (rActorIt != actorPath.rend()) {
-          outfile << "(" << *rActorIt << ")";
-        }
+        outfile << "(" << *rActorIt << ")";
         rActorIt++;
    
         outfile  << HYPHENS;
+        //print out the movie title
          outfile << "[" << *rMovieIt;
          outfile << "#@";
 
          rMovieIt++;
+         //print out the year
          outfile << *rMovieIt << "]";
          rMovieIt++;
          
-         //last node, need special print 
+         //last node, need special print then break
         if ((unsigned int)i + 1 == actorPath.size()) {
           outfile << FINAL_ARROW;
           outfile << "(" << *rActorIt << ")" << endl;
           return 1;
          }
          outfile  << HYPHENS;
-        
     }
   }
   return 1;
