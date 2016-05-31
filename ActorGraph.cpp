@@ -332,12 +332,12 @@ bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile
         if (rActorIt != actorPath.rend()) {
           outfile << "(" << *rActorIt << ")";
         }
-        //last node, need special print 
+        /*//last node, need special print 
         if ((unsigned int)i + 1 == actorPath.size()) {
           outfile << FINAL_ARROW;
           outfile << "(" << *rActorIt << ")" << endl;
           return 1;
-        }
+        }*/
         rActorIt++;
    
         outfile  << HYPHENS;
@@ -348,12 +348,12 @@ bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile
         outfile << *rMovieIt << "]";
         rMovieIt++;
          
-         /*//last node, need special print 
+         //last node, need special print 
          if ((unsigned int)i + 1 == actorPath.size()) {
            outfile << FINAL_ARROW;
            outfile << "(" << *rActorIt << ")" << endl;
            return 1;
-         }*/
+         }
          outfile  << HYPHENS;
         
     }
