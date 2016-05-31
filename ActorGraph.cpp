@@ -28,7 +28,7 @@
 using namespace std;
 
 
-static bool retraceActor(Actor * root, Actor * last, const char * outfilename);
+//static bool retraceActor(Actor * root, Actor * last, const char * outfilename);
 ActorGraph::ActorGraph() {}
 
 bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
@@ -170,7 +170,9 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
 bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file) {
     ifstream infile(pairs_file);
-  
+    ofstream outfile(out_file);
+    outfile << HEADER << endl;
+    
     //Check for header
     bool have_header = false;
  
@@ -214,7 +216,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
         std::vector<Actor*>::iterator it;
         //Set all nodes distance to 0 and visited to false
         for(it = actors.begin(); it != actors.end(); ++it) {
-          //(*it)->visited = false;
+          (*it)->visited = false;
           (*it)->distance = 0;
         }
         //find root node
@@ -267,20 +269,17 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
        //enter loop was never true. changed so the distance check is only
        //performed when we know this is the node's second time getting updated      
               if( (*it)->visited == false) {
-                if ((*it)->distance != 0) {
-                  if ((next->distance + 1) >= (*it)->distance) {
-                    continue;
-                  }
-                }
-                (*it)->distance = next->distance + 1;
-                (*it)->prevActor = next;
-                (*it)->prevMovie = *edgeIt;
-                explore.push(*it);
+                //if( next->distance + 1 < (*it)->distance ) {
+                  (*it)->distance = next->distance + 1;
+                  (*it)->prevActor = next;
+                  (*it)->prevMovie = *edgeIt;
+                  explore.push(*it);
+                //}
               }
             }
          }
        }
-       bool pathFound = retraceActor(root, last, out_file);
+       bool pathFound = retraceActor(root, last, outfile);
        if (!pathFound) {
         return false;
        }
@@ -288,11 +287,11 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
     return true;
 }
 
-static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
+bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile) {
 
-  ofstream outfile(outfilename);
+  //ofstream outfile(outfilename);
 
-  outfile << HEADER << endl;
+  //outfile << HEADER << endl;
 
   std::vector<string> actorPath;
   std::vector<string> moviePath;
@@ -308,13 +307,18 @@ static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
     if (tempA == root) {
       break;
     }
-    tempM = tempA->prevMovie;
-    movieYear = "";
-    movieYear = to_string(tempM->year);
-    moviePath.push_back(movieYear);
-    moviePath.push_back(tempM->movieName);
-
-    tempA = tempA->prevActor;
+    if( tempA->prevMovie ) {
+      tempM = tempA->prevMovie;
+      movieYear = "";
+      movieYear = to_string(tempM->year);
+      moviePath.push_back(movieYear);
+      moviePath.push_back(tempM->movieName);
+      tempA = tempA->prevActor;
+    }
+    else {
+      outfile << "9999" << "\n";
+      return 0;
+    }
   }
 
   if( tempA != root ) {
@@ -329,22 +333,28 @@ static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
         if (rActorIt != actorPath.rend()) {
           outfile << "(" << *rActorIt << ")";
         }
-        rActorIt++;
-   
-        outfile  << HYPHENS;
-         outfile << "[" << *rMovieIt;
-         outfile << "#@";
-
-         rMovieIt++;
-         outfile << *rMovieIt << "]";
-         rMovieIt++;
-         
-         //last node, need special print 
+        //last node, need special print 
         if ((unsigned int)i + 1 == actorPath.size()) {
           outfile << FINAL_ARROW;
           outfile << "(" << *rActorIt << ")" << endl;
           return 1;
-         }
+        }
+        rActorIt++;
+   
+        outfile  << HYPHENS;
+        outfile << "[" << *rMovieIt;
+        outfile << "#@";
+
+        rMovieIt++;
+        outfile << *rMovieIt << "]";
+        rMovieIt++;
+         
+         /*//last node, need special print 
+         if ((unsigned int)i + 1 == actorPath.size()) {
+           outfile << FINAL_ARROW;
+           outfile << "(" << *rActorIt << ")" << endl;
+           return 1;
+         }*/
          outfile  << HYPHENS;
         
     }
