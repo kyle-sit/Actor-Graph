@@ -27,8 +27,6 @@
 
 using namespace std;
 
-
-static bool retraceActor(Actor * root, Actor * last, const char * outfilename);
 ActorGraph::ActorGraph() {}
 
 bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
@@ -170,6 +168,8 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
 bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file) {
     ifstream infile(pairs_file);
+    ofstream outfile(out_file);
+    outfile << HEADER << endl;
   
     //Check for header
     bool have_header = false;
@@ -233,26 +233,6 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
             break;
           }
         } 
-        /*
-        explore.push(root);
-        while( !explore.empty() ) {
-          Actor* next = explore.front();
-          explore.pop();
-          std::vector<Edge*>::iterator edgeIt;
-          for(edgeIt = (next->edges).begin(); edgeIt != (next->edges).end(); ++edgeIt) {
-            for(it = (connections[*edgeIt]).begin(); it != (connections[*edgeIt]).end(); it++) {
-              if( next->distance + 1 < (*it)->distance ) {
-                (*it)->distance = next->distance + 1;
-                (*it)->prevActor = next;
-                (*it)->prevMovie = *edgeIt;
-                explore.push(*it);
-              }
-            }
-          }
-        }
-       */
-       //it = explore[1];
-       //
 
         explore.push(root);
         while( !explore.empty() ) {
@@ -280,7 +260,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
             }
          }
        }
-       bool pathFound = retraceActor(root, last, out_file);
+       bool pathFound = retraceActor(root, last, outfile);
        if (!pathFound) {
         return false;
        }
@@ -288,11 +268,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
     return true;
 }
 
-static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
-
-  ofstream outfile(outfilename);
-
-  outfile << HEADER << endl;
+bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile) {
 
   std::vector<string> actorPath;
   std::vector<string> moviePath;
@@ -308,18 +284,24 @@ static bool retraceActor(Actor * root, Actor * last, const char * outfilename) {
     if (tempA == root) {
       break;
     }
-    tempM = tempA->prevMovie;
-    movieYear = "";
-    movieYear = to_string(tempM->year);
-    moviePath.push_back(movieYear);
-    moviePath.push_back(tempM->movieName);
 
-    tempA = tempA->prevActor;
+    if( tempA->prevMovie ) {
+      tempM = tempA->prevMovie;
+      movieYear = "";
+      movieYear = to_string(tempM->year);
+      moviePath.push_back(movieYear);
+      moviePath.push_back(tempM->movieName);
+      tempA = tempA->prevActor;
+    }
+    else {
+      outfile << "9999" << "\n";
+      return -1;
+    }
   }
 
   if( tempA != root ) {
     outfile << "9999" << "\n";
-    return 0;
+    return -1;
   }
   else {
     auto rActorIt = actorPath.rbegin();
