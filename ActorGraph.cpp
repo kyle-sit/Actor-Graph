@@ -27,7 +27,6 @@
 
 using namespace std;
 
-
 //static bool retraceActor(Actor * root, Actor * last, const char * outfilename);
 ActorGraph::ActorGraph() {}
 
