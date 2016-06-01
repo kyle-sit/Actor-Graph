@@ -214,7 +214,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
         std::vector<Actor*>::iterator it;
         //Set all nodes distance to 0 and visited to false
         for(it = actors.begin(); it != actors.end(); ++it) {
-          //(*it)->visited = false;
+          (*it)->visited = false;
           (*it)->distance = 0;
         }
         //find root node
