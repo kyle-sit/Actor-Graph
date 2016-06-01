@@ -15,4 +15,11 @@ class Edge {
 
     bool operator ==(const Edge& other);
 };
+
+/*class EdgePtrComp {
+public:
+    bool operator()(Edge*& lhs, Edge*& rhs) const {
+        return (*lhs)->weight > (*rhs)->weight;
+    }
+};*/
 #endif

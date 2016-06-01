@@ -24,6 +24,7 @@
 #define HYPHENS "--"
 #define FINAL_ARROW "-->"
 #define HEADER "(actor)--[movie#@year]-->(actor)--..."
+#define Max 1000000
 
 using namespace std;
 
@@ -174,9 +175,6 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
     //Check for header
     bool have_header = false;
  
-    //Keep position in while loop
-    //std::ios_base::seekdir pos = infile.beg; 
-
     // keep reading lines until the end of file is reached
     while (infile) {
         string s;
@@ -209,14 +207,14 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
 
         string actor_one(record[0]);
         string actor_two(record[1]);
-
-        queue<Actor*> explore;
+        
         std::vector<Actor*>::iterator it;
         //Set all nodes distance to 0 and visited to false
         for(it = actors.begin(); it != actors.end(); ++it) {
-          //(*it)->visited = false;
+          (*it)->visited = false;
           (*it)->distance = 0;
         }
+        
         //find root node
         Actor* root;
         for(it = actors.begin(); it != actors.end(); ++it) {
@@ -226,6 +224,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
           }
         } 
 
+        //find node to connect path
         Actor* last;
         for(auto secondIt = actors.begin(); secondIt != actors.end(); ++secondIt) {
           if( actor_two == (*secondIt)->actorName ) {
@@ -234,6 +233,9 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
           }
         } 
 
+        //FIFO queue for BFS
+        queue<Actor*> explore;
+        
         explore.push(root);
         while( !explore.empty() ) {
           Actor* next = explore.front();
@@ -247,11 +249,12 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
        //enter loop was never true. changed so the distance check is only
        //performed when we know this is the node's second time getting updated      
               if( (*it)->visited == false) {
-                if ((*it)->distance != 0) {
+                /*if ((*it)->distance != 0) {
                   if ((next->distance + 1) >= (*it)->distance) {
                     continue;
                   }
-                }
+                }*/
+                (*it)->visited = true;
                 (*it)->distance = next->distance + 1;
                 (*it)->prevActor = next;
                 (*it)->prevMovie = *edgeIt;
@@ -336,3 +339,111 @@ bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile
 }
 
 
+bool ActorGraph::DijkstraSearch(const char* pairs_file, const char* out_file) {
+    ifstream infile(pairs_file);
+    ofstream outfile(out_file);
+    outfile << HEADER << endl;
+  
+    //Check for header
+    bool have_header = false;
+ 
+    // keep reading lines until the end of file is reached
+    while (infile) {
+        string s;
+    
+        // get the next line
+        if (!getline( infile, s )) break;
+
+        if (!have_header) {
+            // skip the header
+            have_header = true;
+            continue;
+        }
+
+        istringstream ss( s );
+        vector <string> record;
+
+        while (ss) {
+          string next;
+      
+          // get the next string before hitting a tab character and put it in 'next'
+          if (!getline( ss, next, '\t' )) break;
+
+          record.push_back( next );
+        }
+    
+        if (record.size() != 2) {
+          // we should have exactly 3 columns
+          continue;
+        }
+
+        string actor_one(record[0]);
+        string actor_two(record[1]);
+
+        //First step of dijkstras setting 
+        std::vector<Actor*>::iterator it;
+        //Set all nodes distance to 0 and visited to false
+        for(it = actors.begin(); it != actors.end(); ++it) {
+          (*it)->visited = false;
+          (*it)->distance = Max;
+          (*it)->prevActor = nullptr;
+          (*it)->prevMovie = nullptr;
+        }
+
+        //find root node
+        Actor* root;
+        for(it = actors.begin(); it != actors.end(); ++it) {
+          if( actor_one == (*it)->actorName ) {
+            root = *it;
+            break;
+          }
+        } 
+
+        //find node to connect path
+        Actor* last;
+        for(auto secondIt = actors.begin(); secondIt != actors.end(); ++secondIt) {
+          if( actor_two == (*secondIt)->actorName ) {
+            last  = *secondIt;
+            break;
+          }
+        }
+
+        /*//Begin dijkstra alg
+        std::priority_queue<Edge*, std::vector<Edge*>, EdgePtrComp> minHeap;
+        Edge* temp = (root->edges).front();
+        minHeap.push(start);
+        while( !minHeap.empty() ) {
+          temp = minHeap.front();
+          
+        }*/
+
+        std::priority_queue<Actor*, std::vector<Actor*>, ActorPtrComp> minHeap;
+        Actor* temp = root;
+        minHeap.push(temp);
+        while( !minHeap.empty() ) {
+          temp = minHeap.top();
+          minHeap.pop();
+          if( !(temp->visited) ) {
+            temp->visited = true;
+
+            std::vector<Edge*>::iterator edgeIt;
+            for(edgeIt = (temp->edges).begin(); edgeIt != (temp->edges).end(); ++edgeIt) {
+              for(it = (connections[*edgeIt]).begin(); it != (connections[*edgeIt]).end(); it++) {
+                int c = temp->distance + (*edgeIt)->weight;
+                if( c < (*it)->distance ) {
+                  (*it)->distance = c; 
+                  (*it)->prevActor = temp;
+                  (*it)->prevMovie = *edgeIt;
+                  minHeap.push(*it);
+                }
+              }
+            }
+          }
+        }
+        bool pathFound = retraceActor(root, last, outfile);
+        if (!pathFound) {
+          return false;
+        }
+    }
+ return true; 
+}
