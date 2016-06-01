@@ -38,18 +38,9 @@ int main(int argc, char* argv[])
     cout << "Invalid second argument";
     return -1;
   }
-  /*switch( argv[2] ) {
-    case 'u' : weight = false;
-                break;
-    case 'w' : weight = true;
-                break;
-    default: cout << "Invalid second argument";
-             return -1;
-  }*/
-
+  
   ActorGraph myGraph;
   bool loaded = myGraph.loadFromFile(argv[1], weight);
-
 
   if( !loaded ) {
     cout << "Failed to load graph" << "\n";
@@ -60,7 +51,7 @@ int main(int argc, char* argv[])
      search = myGraph.BreadthFirstSearch(argv[3], argv[4]); 
   }
   else {
-  //djikstras
+    search = myGraph.DijkstraSearch(argv[3], argv[4]);
   }
 
   if( !search ) {
@@ -68,15 +59,5 @@ int main(int argc, char* argv[])
     return -1;
   }
   
-  //Print out unordered map stuff
-  /* Printing out unordered map test
-  for ( auto it = myGraph.connections.begin(); it != myGraph.connections.end(); ++it) {
-    cerr << "Edge Movie Title Name: " << it->first->movieName << endl;
-    cerr << "Actors Are: ";
-    for (auto actorIt = it->second.begin(); actorIt != it->second.end(); ++actorIt) {
-      cerr << endl << (*actorIt)->actorName << endl;
-    }
-  }
-*/
   return 0;
 }

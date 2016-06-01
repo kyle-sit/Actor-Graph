@@ -23,7 +23,15 @@ class Actor {
       this->actorName = actorName;
       this->prevActor = nullptr;
     }
+
+    bool operator<(const Actor& other) const;
 };
 
+class ActorPtrComp {
+public:
+    bool operator()(Actor*& lhs, Actor*& rhs) const {
+        return (*lhs).distance < (*rhs).distance;
+    }
+};
 #endif 
 
