@@ -23,11 +23,11 @@ class Actor {
 
     bool operator<(const Actor& other) const;
 };
-
+//Used to construct a minheap instead of a PQ default maxheap
 class ActorPtrComp {
 public:
     bool operator()(Actor*& lhs, Actor*& rhs) const {
-        return (*lhs).distance < (*rhs).distance;
+        return (*lhs).distance > (*rhs).distance;
     }
 };
 #endif 
