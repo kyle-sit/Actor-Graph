@@ -1,13 +1,3 @@
-/*
- * ActorGraph.hpp
- * Author: <YOUR NAME HERE>
- * Date:   <DATE HERE>
- *
- * This file is meant to exist as a container for starter code that you can use to read the input file format
- * defined in movie_casts.tsv. Feel free to modify any/all aspects as you wish.
- */
-
-
 #ifndef ACTORGRAPH_HPP
 #define ACTORGRAPH_HPP
 
@@ -28,7 +18,11 @@ protected:
 
 public:
     ActorGraph(void);
-    unordered_map<string, Actor*> connections;
+    std::unordered_map<Edge*, std::vector<Actor*>> connections;
+    std::vector<Actor*> actors;
+    std::vector<Edge*> movies;
+    //std::set<Actor*> actorSet;
+    //std::set<Edge*> movieSet;
 
     // Maybe add some more methods here
   

@@ -14,10 +14,6 @@
 #include <vector>
 #include <unordered_map>
 #include <queue>
-#include "Edge.cpp"
-#include "Actor.cpp"
-#include "Actor.hpp"
-#include "Edge.hpp"
 #include <sstream>
 #include "ActorGraph.hpp"
 
@@ -31,7 +27,80 @@ using namespace std;
 ActorGraph::ActorGraph() {}
 
 bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
+
+    ifstream infile(file_name);    
+
+    //Check for header
+    bool have_header = false;
+ 
+    // keep reading lines until the end of file is reached
+    while (infile) {
+        string s;
     
+        // get the next line
+        if (!getline( infile, s )) break;
+        
+        if (!have_header) {
+            // skip the header
+            have_header = true;
+            continue;
+        }
+
+        istringstream ss( s );
+        vector <string> record;
+
+        while (ss) {
+          string next;
+      
+          // get the next string before hitting a tab character and put it in 'next'
+          if (!getline( ss, next, '\t' )) break;
+
+          record.push_back( next );
+        }
+    
+        if (record.size() != 3) {
+          // we should have exactly 3 columns
+          continue;
+        }
+
+        string actor_name(record[0]);
+        string movie_title(record[1] + record[2]);
+        int movie_year = stoi(record[2]);
+
+        //iterator for the map find function
+        std::unordered_map<string,Actor*>::iterator ait;
+        std::unordered_map<string,Edge*>::iterator eit;
+
+        ait = connections.find(actor_name);
+        //Actor doesn't exist in map
+        if( ait == connections.end() ) {
+          connections[actor_name] = new Actor(actorName);
+        }
+        
+        eit = ((connections[actor_name])->movieList).find(movie_title);
+        //Movie does not exist in actor nodes map
+        if( eit == ((connections[actor_name])->movieList).end() ) {
+          ((connections[actor_name])->movieList)[movie_title] = new Edge(movie_title, movie_year);
+        }
+
+        ait = (((connections[actor_name])->movieList)->actorList).find(actor_name);
+        //Actor does not exist in movies map
+        if( ait == (((connections[actor_name])->movieList)->actorList).end() ) {
+          (((connections[actor_name])->movieList)->actorList)[actor_name] = connections[actor_name];
+        }
+
+    if (!infile.eof()) {
+        cerr << "Failed to read " << infile << "!\n";
+        return false;
+    }
+    infile.close();
+
+    return true;
+
+    }
+}
+
+/*bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
     //Two vectors used
     //std::vector<Actor*> actors;
     //std::vector<Edge*> movies;
@@ -149,14 +218,6 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
         }
     }
 
-    /*//Move pointers to set
-    for(std::vector<Edge*>::iterator toSet = movies.begin(); toSet != movies.end(); ++toSet) {
-      movieSet.insert(*toSet);
-    }
-    for(std::vector<Actor*>::iterator toSet2 = actors.begin(); toSet2 != actors.end(); ++toSet2) {
-      actorSet.insert(*toSet2);
-    }*/
-
     if (!infile.eof()) {
         cerr << "Failed to read " << infile << "!\n";
         return false;
@@ -164,10 +225,10 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
     infile.close();
 
     return true;
-}
+}*/
 
 
-bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file) {
+/*bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file) {
     ifstream infile(pairs_file);
     ofstream outfile(out_file);
     outfile << HEADER << endl;
@@ -249,11 +310,11 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
        //enter loop was never true. changed so the distance check is only
        //performed when we know this is the node's second time getting updated      
               if( (*it)->visited == false) {
-                /*if ((*it)->distance != 0) {
+                *if ((*it)->distance != 0) {
                   if ((next->distance + 1) >= (*it)->distance) {
                     continue;
                   }
-                }*/
+                }*
                 (*it)->visited = true;
                 (*it)->distance = next->distance + 1;
                 (*it)->prevActor = next;
@@ -269,7 +330,7 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
        }
     }
     return true;
-}
+}*/
 
 bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile) {
 
