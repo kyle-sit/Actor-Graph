@@ -67,29 +67,29 @@ bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
         string actor_name(record[0]);
         string movie_title(record[1] + record[2]);
+        string movie(record[1]);
         int movie_year = stoi(record[2]);
 
         //iterator for the map find function
         std::unordered_map<string,Actor*>::iterator ait;
         std::unordered_map<string,Edge*>::iterator eit;
 
-        ait = connections.find(actor_name);
+        ait = Aconnections.find(actor_name);
         //Actor doesn't exist in map
-        if( ait == connections.end() ) {
-          connections[actor_name] = new Actor(actor_name);
+        if( ait == Aconnections.end() ) {
+          Aconnections[actor_name] = new Actor(actor_name);
         }
         
-        eit = ((connections[actor_name])->movieList).find(movie_title);
+        eit = Econnections.find(movie_title);
         //Movie does not exist in actor nodes map
-        if( eit == ((connections[actor_name])->movieList).end() ) {
-          ((connections[actor_name])->movieList)[movie_title] = new Edge(movie_title, movie_year);
+        if( eit == Econnections.end() ) {
+          Econnections[movie_title] = new Edge(movie, movie_year);
         }
 
-        ait = (((connections[actor_name])->movieList)[movie_title])->actorList.find(actor_name);
-        //Actor does not exist in movies map
-        if( ait == (((connections[actor_name])->movieList)[movie_title])->actorList.end() ) {
-          (((connections[actor_name])->movieList)[movie_title]->actorList)[actor_name] = connections[actor_name];
-        }
+        (Aconnections[actor_name])->movieList[movie_title] = Econnections[movie_title];
+        (Econnections[movie_title])->actorList[actor_name] = Aconnections[actor_name];
+
+
     }
 
     if (!infile.eof()) {
@@ -144,11 +144,11 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
         string actor_two(record[1]);
         
         //Find the nodes we want the path for
-        Actor* root = connections[actor_one];
-        Actor* last = connections[actor_two];
+        Actor* root = Aconnections[actor_one];
+        Actor* last = Aconnections[actor_two];
 
-        auto ait = connections.begin();
-        for ( ; ait!= connections.end(); ++ait ){
+        auto ait = Aconnections.begin();
+        for ( ; ait!= Aconnections.end(); ++ait ){
           (ait->second)->visited = false;
         }
         
@@ -162,13 +162,16 @@ bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file
         while( !explore.empty() ) {
           temp = explore.front();
           explore.pop();
+          temp->visited = true;
           
           std::unordered_map<string,Edge*>::iterator eit;
           //for the current node, go to all of its edges
           for(eit = (temp->movieList).begin(); eit != (temp->movieList).end(); ++eit) {
+            //cerr << eit->second->movieName <<endl;
             //for each of these edges, check to see if the actors its connected
             //to have been visited, if not, update them
             for(ait = (eit->second)->actorList.begin(); ait != (eit->second)->actorList.end(); ait++) {
+              //cerr <<  ait->second->actorName << endl;
               if( (ait->second)->visited == false) {
                 (ait->second)->visited = true;
                 (ait->second)->distance = temp->distance + 1;
@@ -213,10 +216,7 @@ bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile
       tempA = tempA->prevActor;
     }
     else {
-      cerr << "Breaking because null previous movie" << endl;
-      cerr << "The actor we're at is: " << tempA->actorName << endl;
-      cerr << "The root is " << root->actorName << endl;
-      cerr << "9999" << "\n";
+      outfile << "9999" << "\n";
       return -1;
     }
   }
@@ -254,7 +254,7 @@ bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile
 
 
 bool ActorGraph::DijkstraSearch(const char* pairs_file, const char* out_file) {
- /*   ifstream infile(pairs_file);
+    ifstream infile(pairs_file);
     ofstream outfile(out_file);
     outfile << HEADER << endl;
   
@@ -295,41 +295,18 @@ bool ActorGraph::DijkstraSearch(const char* pairs_file, const char* out_file) {
         string actor_two(record[1]);
 
         //First step of dijkstras setting 
-        std::vector<Actor*>::iterator it;
+        std::unordered_map<string,Actor*>::iterator ait;
         //Set all nodes distance to 0 and visited to false
-        for(it = actors.begin(); it != actors.end(); ++it) {
-          (*it)->visited = false;
-          (*it)->distance = Max;
-          (*it)->prevActor = nullptr;
-          (*it)->prevMovie = nullptr;
+        for(ait = Aconnections.begin(); ait != Aconnections.end(); ++ait) {
+          (ait->second)->visited = false;
+          (ait->second)->distance = Max;
+          (ait->second)->prevActor = nullptr;
+          (ait->second)->prevMovie = nullptr;
         }
 
-        //find root node
-        Actor* root;
-        for(it = actors.begin(); it != actors.end(); ++it) {
-          if( actor_one == (*it)->actorName ) {
-            root = *it;
-            break;
-          }
-        } 
-
-        //find node to connect path
-        Actor* last;
-        for(auto secondIt = actors.begin(); secondIt != actors.end(); ++secondIt) {
-          if( actor_two == (*secondIt)->actorName ) {
-            last  = *secondIt;
-            break;
-          }
-        }
-
-        *Begin dijkstra alg
-        std::priority_queue<Edge*, std::vector<Edge*>, EdgePtrComp> minHeap;
-        Edge* temp = (root->edges).front();
-        minHeap.push(start);
-        while( !minHeap.empty() ) {
-          temp = minHeap.front();
-          
-        }*
+        //Find the nodes we want the path for
+        Actor* root = Aconnections[actor_one];
+        Actor* last = Aconnections[actor_two];
 
         //Begin Dijkstra's
         //Root's distance is ZERO
@@ -342,30 +319,31 @@ bool ActorGraph::DijkstraSearch(const char* pairs_file, const char* out_file) {
         while( !minHeap.empty() ) {
           temp = minHeap.top();
           minHeap.pop();
+
           //if this node hasn't been visited yet 
           if( !(temp->visited) ) {
             temp->visited = true;
             
-            std::vector<Edge*>::iterator edgeIt;
-            //for each of the movies this actor is in 
-            for(edgeIt = (temp->edges).begin(); edgeIt != (temp->edges).end(); ++edgeIt) {
-              //visit each of those movie's actors, if the path is the shortest
-              //it's seen for that actor, update actor's fields and push it 
-              //onto our priority queue
-              for(it = (connections[*edgeIt]).begin(); it != (connections[*edgeIt]).end(); it++) {
-                int c = temp->distance + (*edgeIt)->weight;
-                cerr << "Attempting to set: " << (*it)->actorName << endl;
+            std::unordered_map<string,Edge*>::iterator eit;
+            //for the current node, go to all of its edges
+            for(eit = (temp->movieList).begin(); eit != (temp->movieList).end(); ++eit) {
+              //cerr << eit->second->movieName <<endl;
+              //for each of these edges, check to see if the actors its connected
+              //to have been visited, if not, update them
+              for(ait = (eit->second)->actorList.begin(); ait != (eit->second)->actorList.end(); ait++) {
+                int c = temp->distance + (eit->second)->weight;
+                /*cerr << "Attempting to set: " << (ait->second)->actorName << endl;
                 cerr << "The attempted new distance is " << c << endl;
-                cerr << "Only insert if its less than: " << (*it)->distance;
+                cerr << "Only insert if its less than: " << (ait->second)->distance;*/
                 //If the node we're at has a better potential distance, OR it
                 //hasn't even been visited yet, set it's fields and then push it
                 //onto the PQ
-                if( c < (*it)->distance || (*it)->distance == Max) {
-                  cerr << "Setting: " << (*it)->actorName << "PrevMovie is: " << (*edgeIt)->movieName << endl;
-                  (*it)->distance = c; 
-                  (*it)->prevActor = temp;
-                  (*it)->prevMovie = *edgeIt;
-                  minHeap.push(*it);
+                if( c < (ait->second)->distance ) {
+                  //cerr << "Setting: " << (ait->second)->actorName << "PrevMovie is: " << (eit->second)->movieName << endl;
+                  (ait->second)->distance = c; 
+                  (ait->second)->prevActor = temp;
+                  (ait->second)->prevMovie = eit->second;
+                  minHeap.push(ait->second);
                 }
               }
             }
@@ -377,6 +355,6 @@ bool ActorGraph::DijkstraSearch(const char* pairs_file, const char* out_file) {
         if (!pathFound) {
           return false;
         }
-    }*/
+    }
  return true; 
 }

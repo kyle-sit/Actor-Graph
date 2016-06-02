@@ -28,7 +28,8 @@ protected:
 
 public:
     ActorGraph(void);
-    unordered_map<string, Actor*> connections;
+    unordered_map<string, Actor*> Aconnections;
+    unordered_map<string, Edge*> Econnections;
 
     // Maybe add some more methods here
   
