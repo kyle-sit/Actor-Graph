@@ -1,0 +1,23 @@
+Names: Louis Leung, Kyle Sit
+
+Problem we solved: We wanted to find out what the average distance was between a
+specific actor (that we allow the user to input), and all the other actors. 
+
+How we solved it: Taking a movie_casts file from the user, we loaded it into
+file and then called a BFS on it using the desiredActor input that the user gave
+us as the root. Then we went through every single Actor Node that had been
+touched by our breadth first search, added their distances, and then divided by
+the number of Actor nodes that had been touched. Then we printed out this number
+which is the average distance between a specific actor and all the other actors
+it is related to.
+
+How we tested it: We used a smaller cast file with more manageable distances
+between each node, and manually calculated the average distance with different actor inputs
+against our program output.
+
+How to run the program:
+./extension <casts_file> <ACTOR_LAST_NAME,> <ACTOR_FIRST_NAME>
+**Note: the actor you want the avg distance for needs to follow a strict 
+LASTNAME, FIRSTNAME format, since we were too lazy to handle processing excess
+roman numerals or weird names like BADALUCCO JR., JOSEPH. Please give us points.
+We are tired.

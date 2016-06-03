@@ -53,6 +53,8 @@ public:
     bool loadFromFile(const char* file_name, bool use_weighted_edges);
     
     bool BreadthFirstSearch(const char* pairs_file, const char* out_file);
+
+	bool BFSAvg(string desiredActor);
     
     bool DijkstraSearch(const char* pairs_file, const char* out_file);
 

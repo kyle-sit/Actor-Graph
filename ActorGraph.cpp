@@ -410,7 +410,10 @@ bool ActorGraph::BreadthFirstSearchRes(string actor_one, string actor_two) {
             //if we've reached the second actor, return immediately
           if( (ait->second)->visited == false ) {
             
-            
+            if ((ait->second)->actorName == actor_two) {
+              return 1;
+            }
+
 
             (ait->second)->visited = true;
             (ait->second)->distance = temp->distance + 1;
@@ -418,9 +421,6 @@ bool ActorGraph::BreadthFirstSearchRes(string actor_one, string actor_two) {
             (ait->second)->prevMovie = eit->second;
             explore.push(ait->second);
             
-            if ((ait->second)->actorName == actor_two) {
-              return 1;
-            }
           }
         }
       }
@@ -428,14 +428,48 @@ bool ActorGraph::BreadthFirstSearchRes(string actor_one, string actor_two) {
   //after populating data fields of hash maps, has the actor we're looking for
   //been touched? if so, return 1, if not return 0
   return 0;
-  /*
-  if (Aconnections[actor_two] -> prevActor != nullptr) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
-  */
-  
 }
+
+bool ActorGraph::BFSAvg(string desiredActor) {
+
+    //Find the nodes we want the path for
+    Actor* root = Aconnections[desiredActor];
+
+    auto ait = Aconnections.begin();
+    for ( ; ait!= Aconnections.end(); ++ait ){
+      (ait->second)->visited = false;
+    }
+
+    //FIFO queue for BFS
+    queue<Actor*> explore;
+
+    //BFS alg start
+    Actor* temp = root;
+    explore.push(temp);
+
+    while( !explore.empty() ) {
+      temp = explore.front();
+      explore.pop();
+      temp->visited = true;
+
+      std::unordered_map<string,Edge*>::iterator eit;
+      //for the current node, go to all of its edges
+      for(eit = (temp->movieList).begin(); eit != (temp->movieList).end(); ++eit) {
+        //for each of these edges, check to see if the actors its connected
+        //to have been visited, if not, update them
+        for(ait = (eit->second)->actorList.begin(); ait != (eit->second)->actorList.end(); ait++) {
+          //cerr <<  ait->second->actorName << endl;
+          if( (ait->second)->visited == false) {
+            (ait->second)->visited = true;
+            (ait->second)->distance = temp->distance + 1;
+            (ait->second)->prevActor = temp;
+            (ait->second)->prevMovie = eit->second;
+            explore.push(ait->second);
+          }
+        }
+      }
+    }
+  return true;
+}
+
 
