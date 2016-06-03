@@ -6,7 +6,7 @@
  * This file is meant to exist as a container for starter code that you can use to read the input file format
  * defined in movie_casts.tsv. Feel free to modify any/all aspects as you wish.
  */
- 
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -30,167 +30,173 @@ ActorGraph::ActorGraph() {}
 
 bool ActorGraph::loadFromFile(const char* file_name, bool use_weighted_edges) {
 
-    ifstream infile(file_name);    
 
-    //Check for header
-    bool have_header = false;
- 
-    // keep reading lines until the end of file is reached
-    while (infile) {
-        string s;
-    
-        // get the next line
-        if (!getline( infile, s )) break;
-        
-        if (!have_header) {
-            // skip the header
-            have_header = true;
-            continue;
-        }
+  ifstream infile(file_name);    
 
-        istringstream ss( s );
-        vector <string> record;
+  //Check for header
+  bool have_header = false;
 
-        while (ss) {
-          string next;
-      
-          // get the next string before hitting a tab character and put it in 'next'
-          if (!getline( ss, next, '\t' )) break;
+  // keep reading lines until the end of file is reached
+  while (infile) {
+    string s;
 
-          record.push_back( next );
-        }
-    
-        if (record.size() != 3) {
-          // we should have exactly 3 columns
-          continue;
-        }
+    // get the next line
+    if (!getline( infile, s )) break;
 
-        string actor_name(record[0]);
-        string movie_title(record[1] + record[2]);
-        string movie(record[1]);
-        int movie_year = stoi(record[2]);
-
-        //iterator for the map find function
-        std::unordered_map<string,Actor*>::iterator ait;
-        std::unordered_map<string,Edge*>::iterator eit;
-
-        ait = Aconnections.find(actor_name);
-        //Actor doesn't exist in map
-        if( ait == Aconnections.end() ) {
-          Aconnections[actor_name] = new Actor(actor_name);
-        }
-        
-        eit = Econnections.find(movie_title);
-        //Movie does not exist in actor nodes map
-        if( eit == Econnections.end() ) {
-          Econnections[movie_title] = new Edge(movie, movie_year);
-        }
-
-        (Aconnections[actor_name])->movieList[movie_title] = Econnections[movie_title];
-        (Econnections[movie_title])->actorList[actor_name] = Aconnections[actor_name];
-
-
+    if (!have_header) {
+      // skip the header
+      have_header = true;
+      continue;
     }
 
-    if (!infile.eof()) {
-        cerr << "Failed to read " << infile << "!\n";
-        return false;
-    }
-    infile.close();
+    istringstream ss( s );
+    vector <string> record;
 
-    return true;
+    while (ss) {
+      string next;
+
+      // get the next string before hitting a tab character and put it in 'next'
+      if (!getline( ss, next, '\t' )) break;
+
+      record.push_back( next );
+    }
+
+    if (record.size() != 3) {
+      // we should have exactly 3 columns
+      continue;
+    }
+
+
+    string actor_name(record[0]);
+    string movie_title(record[1] + record[2]);
+    string movie(record[1]);
+    int movie_year = stoi(record[2]);
+
+    //iterator for the map find function
+    std::unordered_map<string,Actor*>::iterator ait;
+    std::unordered_map<string,Edge*>::iterator eit;
+
+    ait = Aconnections.find(actor_name);
+    //Actor doesn't exist in map
+    if( ait == Aconnections.end() ) {
+      Aconnections[actor_name] = new Actor(actor_name);
+    }
+
+    eit = Econnections.find(movie_title);
+    //Movie does not exist in actor nodes map
+    if( eit == Econnections.end() ) {
+      Econnections[movie_title] = new Edge(movie, movie_year);
+    }
+
+    (Aconnections[actor_name])->movieList[movie_title] = Econnections[movie_title];
+    (Econnections[movie_title])->actorList[actor_name] = Aconnections[actor_name];
+
+
+  }
+
+  if (!infile.eof()) {
+    cerr << "Failed to read " << infile << "!\n";
+    return false;
+  }
+  infile.close();
+
+  return true;
 
 }
 
 bool ActorGraph::BreadthFirstSearch(const char* pairs_file, const char* out_file) {
-    ifstream infile(pairs_file);
-    ofstream outfile(out_file);
-    outfile << HEADER << endl;
-  
-    //Check for header
-    bool have_header = false;
- 
-    // keep reading lines until the end of file is reached
-    while (infile) {
-        string s;
-    
-        // get the next line
-        if (!getline( infile, s )) break;
+  ifstream infile(pairs_file);
+  ofstream outfile(out_file);
 
-        if (!have_header) {
-            // skip the header
-            have_header = true;
-            continue;
-        }
+  outfile << HEADER << endl;
 
-        istringstream ss( s );
-        vector <string> record;
+  //Check for header
+  bool have_header = false;
 
-        while (ss) {
-          string next;
-      
-          // get the next string before hitting a tab character and put it in 'next'
-          if (!getline( ss, next, '\t' )) break;
+  // keep reading lines until the end of file is reached
+  while (infile) {
+    string s;
 
-          record.push_back( next );
-        }
-    
-        if (record.size() != 2) {
-          // we should have exactly 3 columns
-          continue;
-        }
+    // get the next line
+    if (!getline( infile, s )) break;
 
-        string actor_one(record[0]);
-        string actor_two(record[1]);
-        
-        //Find the nodes we want the path for
-        Actor* root = Aconnections[actor_one];
-        Actor* last = Aconnections[actor_two];
-
-        auto ait = Aconnections.begin();
-        for ( ; ait!= Aconnections.end(); ++ait ){
-          (ait->second)->visited = false;
-        }
-        
-        //FIFO queue for BFS
-        queue<Actor*> explore;
-        
-        //BFS alg start
-        Actor* temp = root;
-        explore.push(temp);
-
-        while( !explore.empty() ) {
-          temp = explore.front();
-          explore.pop();
-          temp->visited = true;
-          
-          std::unordered_map<string,Edge*>::iterator eit;
-          //for the current node, go to all of its edges
-          for(eit = (temp->movieList).begin(); eit != (temp->movieList).end(); ++eit) {
-            //cerr << eit->second->movieName <<endl;
-            //for each of these edges, check to see if the actors its connected
-            //to have been visited, if not, update them
-            for(ait = (eit->second)->actorList.begin(); ait != (eit->second)->actorList.end(); ait++) {
-              //cerr <<  ait->second->actorName << endl;
-              if( (ait->second)->visited == false) {
-                (ait->second)->visited = true;
-                (ait->second)->distance = temp->distance + 1;
-                (ait->second)->prevActor = temp;
-                (ait->second)->prevMovie = eit->second;
-                explore.push(ait->second);
-              }
-            }
-         }
-       }
-       bool pathFound = retraceActor(root, last, outfile);
-       if (!pathFound) {
-        return false;
-       }
+    if (!have_header) {
+      // skip the header
+      have_header = true;
+      continue;
     }
-    return true;
+
+    istringstream ss( s );
+    vector <string> record;
+
+    while (ss) {
+      string next;
+
+      // get the next string before hitting a tab character and put it in 'next'
+      if (!getline( ss, next, '\t' )) break;
+
+      record.push_back( next );
+    }
+
+    if (record.size() != 2) {
+      // we should have exactly 3 columns
+      continue;
+    }
+
+    string actor_one(record[0]);
+    string actor_two(record[1]);
+
+
+    //Find the nodes we want the path for
+    Actor* root = Aconnections[actor_one];
+    Actor* last = Aconnections[actor_two];
+
+    auto ait = Aconnections.begin();
+    for ( ; ait!= Aconnections.end(); ++ait ){
+      (ait->second)->visited = false;
+    }
+
+    //FIFO queue for BFS
+    queue<Actor*> explore;
+
+    //BFS alg start
+    Actor* temp = root;
+    explore.push(temp);
+
+    while( !explore.empty() ) {
+      temp = explore.front();
+      explore.pop();
+      temp->visited = true;
+
+      std::unordered_map<string,Edge*>::iterator eit;
+      //for the current node, go to all of its edges
+      for(eit = (temp->movieList).begin(); eit != (temp->movieList).end(); ++eit) {
+        //cerr << eit->second->movieName <<endl;
+        //for each of these edges, check to see if the actors its connected
+        //to have been visited, if not, update them
+        for(ait = (eit->second)->actorList.begin(); ait != (eit->second)->actorList.end(); ait++) {
+          //cerr <<  ait->second->actorName << endl;
+          if( (ait->second)->visited == false) {
+            (ait->second)->visited = true;
+            (ait->second)->distance = temp->distance + 1;
+            (ait->second)->prevActor = temp;
+            (ait->second)->prevMovie = eit->second;
+            explore.push(ait->second);
+          }
+        }
+      }
+    }
+    bool pathFound = retraceActor(root, last, outfile);
+    if (!pathFound) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile) {
+
+
 
   std::vector<string> actorPath;
   std::vector<string> moviePath;
@@ -199,8 +205,8 @@ bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile
   Edge* tempM;
   string movieYear;
 
-//FIX: was never pushing root node onto actor list, and the roots prevMovie was
-//getting pushed when it didn't have one
+  //FIX: was never pushing root node onto actor list, and the roots prevMovie was
+  //getting pushed when it didn't have one
   while (tempA) {
     actorPath.push_back(tempA->actorName);
     if (tempA == root) {
@@ -220,7 +226,7 @@ bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile
       return -1;
     }
   }
-  
+
   auto rActorIt = actorPath.rbegin();
   auto rMovieIt = moviePath.rbegin();
   for (int i = 1;(unsigned int) i <=  actorPath.size(); i++) {
@@ -254,112 +260,115 @@ bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile
 
 
 bool ActorGraph::DijkstraSearch(const char* pairs_file, const char* out_file) {
-    ifstream infile(pairs_file);
-    ofstream outfile(out_file);
-    outfile << HEADER << endl;
-  
-    //Check for header
-    bool have_header = false;
- 
-    // keep reading lines until the end of file is reached
-    while (infile) {
-        string s;
-    
-        // get the next line
-        if (!getline( infile, s )) break;
+  ifstream infile(pairs_file);
+  ofstream outfile(out_file);
+  outfile << HEADER << endl;
 
-        if (!have_header) {
-            // skip the header
-            have_header = true;
-            continue;
-        }
+  //Check for header
+  bool have_header = false;
 
-        istringstream ss( s );
-        vector <string> record;
+  // keep reading lines until the end of file is reached
+  while (infile) {
+    string s;
 
-        while (ss) {
-          string next;
-      
-          // get the next string before hitting a tab character and put it in 'next'
-          if (!getline( ss, next, '\t' )) break;
+    // get the next line
+    if (!getline( infile, s )) break;
 
-          record.push_back( next );
-        }
-    
-        if (record.size() != 2) {
-          // we should have exactly 3 columns
-          continue;
-        }
+    if (!have_header) {
+      // skip the header
+      have_header = true;
+      continue;
+    }
 
-        string actor_one(record[0]);
-        string actor_two(record[1]);
+    istringstream ss( s );
+    vector <string> record;
 
-        //First step of dijkstras setting 
-        std::unordered_map<string,Actor*>::iterator ait;
-        //Set all nodes distance to 0 and visited to false
-        for(ait = Aconnections.begin(); ait != Aconnections.end(); ++ait) {
-          (ait->second)->visited = false;
-          (ait->second)->distance = Max;
-          (ait->second)->prevActor = nullptr;
-          (ait->second)->prevMovie = nullptr;
-        }
+    while (ss) {
+      string next;
 
-        //Find the nodes we want the path for
-        Actor* root = Aconnections[actor_one];
-        Actor* last = Aconnections[actor_two];
+      // get the next string before hitting a tab character and put it in 'next'
+      if (!getline( ss, next, '\t' )) break;
 
-        //Begin Dijkstra's
-        //Root's distance is ZERO
-        std::priority_queue<Actor*, std::vector<Actor*>, ActorPtrComp> minHeap;
-        Actor* temp = root;
-        root -> distance = 0;
-        minHeap.push(temp);
-       
+      record.push_back( next );
+    }
 
-        while( !minHeap.empty() ) {
-          temp = minHeap.top();
-          minHeap.pop();
+    if (record.size() != 2) {
+      // we should have exactly 3 columns
+      continue;
+    }
 
-          //if this node hasn't been visited yet 
-          if( !(temp->visited) ) {
-            temp->visited = true;
-            
-            std::unordered_map<string,Edge*>::iterator eit;
-            //for the current node, go to all of its edges
-            for(eit = (temp->movieList).begin(); eit != (temp->movieList).end(); ++eit) {
-              //cerr << eit->second->movieName <<endl;
-              //for each of these edges, check to see if the actors its connected
-              //to have been visited, if not, update them
-              for(ait = (eit->second)->actorList.begin(); ait != (eit->second)->actorList.end(); ait++) {
-                int c = temp->distance + (eit->second)->weight;
-                /*cerr << "Attempting to set: " << (ait->second)->actorName << endl;
-                cerr << "The attempted new distance is " << c << endl;
-                cerr << "Only insert if its less than: " << (ait->second)->distance;*/
-                //If the node we're at has a better potential distance, OR it
-                //hasn't even been visited yet, set it's fields and then push it
-                //onto the PQ
-                if( c < (ait->second)->distance ) {
-                  //cerr << "Setting: " << (ait->second)->actorName << "PrevMovie is: " << (eit->second)->movieName << endl;
-                  (ait->second)->distance = c; 
-                  (ait->second)->prevActor = temp;
-                  (ait->second)->prevMovie = eit->second;
-                  minHeap.push(ait->second);
-                }
-              }
+    string actor_one(record[0]);
+    string actor_two(record[1]);
+
+    //First step of dijkstras setting 
+    std::unordered_map<string,Actor*>::iterator ait;
+    //Set all nodes distance to 0 and visited to false
+    for(ait = Aconnections.begin(); ait != Aconnections.end(); ++ait) {
+      (ait->second)->visited = false;
+      (ait->second)->distance = Max;
+      (ait->second)->prevActor = nullptr;
+      (ait->second)->prevMovie = nullptr;
+    }
+
+    //Find the nodes we want the path for
+    Actor* root = Aconnections[actor_one];
+    Actor* last = Aconnections[actor_two];
+
+    //Begin Dijkstra's
+    //Root's distance is ZERO
+    std::priority_queue<Actor*, std::vector<Actor*>, ActorPtrComp> minHeap;
+    Actor* temp = root;
+    root -> distance = 0;
+    minHeap.push(temp);
+
+
+    while( !minHeap.empty() ) {
+      temp = minHeap.top();
+      minHeap.pop();
+
+      //if this node hasn't been visited yet 
+      if( !(temp->visited) ) {
+        temp->visited = true;
+
+        std::unordered_map<string,Edge*>::iterator eit;
+        //for the current node, go to all of its edges
+        for(eit = (temp->movieList).begin(); eit != (temp->movieList).end(); ++eit) {
+          //cerr << eit->second->movieName <<endl;
+          //for each of these edges, check to see if the actors its connected
+          //to have been visited, if not, update them
+          for(ait = (eit->second)->actorList.begin(); ait != (eit->second)->actorList.end(); ait++) {
+            int c = temp->distance + (eit->second)->weight;
+            /*cerr << "Attempting to set: " << (ait->second)->actorName << endl;
+              cerr << "The attempted new distance is " << c << endl;
+              cerr << "Only insert if its less than: " << (ait->second)->distance;*/
+            //If the node we're at has a better potential distance, OR it
+            //hasn't even been visited yet, set it's fields and then push it
+            //onto the PQ
+            if( c < (ait->second)->distance ) {
+              //cerr << "Setting: " << (ait->second)->actorName << "PrevMovie is: " << (eit->second)->movieName << endl;
+              (ait->second)->distance = c; 
+              (ait->second)->prevActor = temp;
+              (ait->second)->prevMovie = eit->second;
+              minHeap.push(ait->second);
             }
           }
         }
-        //since all the nodes fields are filled now, retrace the path so
-        //we can print to outfile
-        bool pathFound = retraceActor(root, last, outfile);
-        if (!pathFound) {
-          return false;
-        }
+      }
     }
- return true; 
+    //since all the nodes fields are filled now, retrace the path so
+    //we can print to outfile
+    bool pathFound = retraceActor(root, last, outfile);
+    if (!pathFound) {
+      return false;
+    }
+  }
+  return true; 
 }
 
 bool ActorGraph::loadFromFileRes(std::ifstream& infile, int yearRes) {
+  
+  infile.clear();
+  infile.seekg(0, ios::beg);
 
   //Check for header
   bool have_header = false;
@@ -388,7 +397,6 @@ bool ActorGraph::loadFromFileRes(std::ifstream& infile, int yearRes) {
 
         record.push_back( next );
       }
-
       if (record.size() != 3) {
         // we should have exactly 3 columns
         continue;
@@ -399,27 +407,102 @@ bool ActorGraph::loadFromFileRes(std::ifstream& infile, int yearRes) {
       string movie_title(record[1]+record[2]);
       int movie_year = stoi(record[2]);
 
-      if( movie_year != yearRes ) {
-        continue;
-      }
 
       //iterator for the map find function
+      /*
       std::unordered_map<string,Actor*>::iterator ait;
-      std::unordered_map<string,Edge*>::iterator eit;
       ait = Aconnections.find(actor_name);
       //Actor doesn't exist in map
       if( ait == Aconnections.end() ) {
         Aconnections[actor_name] = new Actor(actor_name);
       }
+      */
+
+      if( movie_year != yearRes ) {
+        continue;
+      }
+
+      std::unordered_map<string,Edge*>::iterator eit;
 
       eit = Econnections.find(movie_title);
       //Movie does not exist in actor nodes map
       if( eit == Econnections.end() ) {
         Econnections[movie_title] = new Edge(movie, movie_year);
       }
+      
+      eit = ((Aconnections[actor_name])->movieList).find(movie_title);
+      if( eit == ((Aconnections[actor_name])->movieList).end() ) {
+        (Aconnections[actor_name])->movieList[movie_title] = Econnections[movie_title];
+      }
 
-      (Aconnections[actor_name])->movieList[movie_title] = Econnections[movie_title];
-      (Econnections[movie_title])->actorList[actor_name] = Aconnections[actor_name];
+      auto ait = ((Econnections[movie_title])->actorList).find(actor_name);
+      if( ait == ((Econnections[movie_title])->actorList).end() ) {
+        (Econnections[movie_title])->actorList[actor_name] = Aconnections[actor_name];
+      }
   }
   return true;
 }
+
+bool ActorGraph::BreadthFirstSearchRes(string actor_one, string actor_two) {
+
+
+  //Find the nodes we want the path for
+  Actor* root = Aconnections[actor_one];
+  
+  auto ait = Aconnections.begin();
+  for ( ; ait!= Aconnections.end(); ++ait ){
+    (ait->second)->visited = false;
+  }
+  
+
+  //FIFO queue for BFS
+  queue<Actor*> explore;
+
+  //BFS alg start
+  Actor* temp = root;
+  explore.push(temp);
+  
+  while( !explore.empty() ) {
+    temp = explore.front();
+    explore.pop();
+    temp->visited = true;
+
+    std::unordered_map<string,Edge*>::iterator eit;
+    //for the current node, go to all of its edges
+    //cerr << temp->actorName << endl;
+    for(eit = (temp->movieList).begin(); eit != (temp->movieList).end(); ++eit) {
+      //cerr << eit->second->movieName <<endl;
+      //for each of these edges, check to see if the actors its connected
+      //to have been visited, if not, update them
+      //cerr << "About to segfault on: " << (eit->second)->movieName << endl;
+        for(ait = (eit->second)->actorList.begin(); ait != (eit->second)->actorList.end(); ait++) {
+          //if( (ait->second)->distance > temp->distance + 1 || (ait->second)->distance == 0) {
+            //if we've reached the second actor, return immediately
+          if( (ait->second)->visited == false ) {
+
+            if ((ait->second)->actorName == actor_two) {
+              return 1;
+            }
+
+            (ait->second)->visited = true;
+            (ait->second)->distance = temp->distance + 1;
+            (ait->second)->prevActor = temp;
+            (ait->second)->prevMovie = eit->second;
+            explore.push(ait->second);
+          }
+        }
+      }
+    }
+  return 0;
+  //after populating data fields of hash maps, has the actor we're looking for
+  //been touched? if so, return 1, if not return 0
+  /*
+  if (Aconnections[actor_two] -> prevActor != nullptr) {
+    return 1;
+  }
+  else {
+    return 0;
+  }*/
+  
+}
+
