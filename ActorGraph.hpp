@@ -35,6 +35,10 @@ class ActorGraph {
 public:
     //Constructor
     ActorGraph(void);
+ 
+    //Destructor
+    ~ActorGraph();
+    
     //Member Variables
     unordered_map<string, Actor*> Aconnections;
     unordered_map<string, Edge*> Econnections;
@@ -53,7 +57,8 @@ public:
     //BFS that searches through all edges and actors
     bool BreadthFirstSearch(const char* pairs_file, const char* out_file);
 
-	bool BFSAvg(string desiredActor);
+    //Extension BFS
+	  bool BFSAvg(string desiredActor);
     
     //Searches through all edges and actors but modifies acccording to weight
     bool DijkstraSearch(const char* pairs_file, const char* out_file);

@@ -29,6 +29,20 @@ using namespace std;
 //Default Constuctor
 ActorGraph::ActorGraph() {}
 
+//Destructor
+ActorGraph::~ActorGraph(){
+    std::unordered_map<string,Actor*>::iterator ait;
+    std::unordered_map<string,Edge*>::iterator eit;
+
+    for( ait = Aconnections.begin(); ait != Aconnections.end(); ++ait ) {
+      delete ait->second;
+    }
+
+    for( eit = Econnections.begin(); eit != Econnections.end(); ++eit ) {
+      delete eit->second;
+    }
+}
+
 /*
  * loadFromFile method parses our input file and creates our graph using
  * two unordered_maps.  One map for actors and one map for edges.  These maps

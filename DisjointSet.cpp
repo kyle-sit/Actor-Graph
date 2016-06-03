@@ -27,6 +27,23 @@ using namespace std;
 //Default constructor
 DisjointSet::DisjointSet() {}
 
+//Destructor    
+DisjointSet::~DisjointSet() {
+    std::unordered_map<string,ActorNode*>::iterator ait;
+    std::unordered_map<string,Movie*>::iterator mit;
+    std::unordered_map<int,unordered_map<string,Movie*>>::iterator yit;
+    
+    for( ait = DJactors.begin(); ait != DJactors.end(); ++ait ) {
+      delete ait->second;
+    }
+
+    for( yit = yearList.begin(); yit != yearList.end(); ++yit ) {
+      for( mit = (yit->second).begin(); mit != (yit->second).end(); ++mit ) {
+        delete mit->second;
+      }
+    }
+}
+  
 /*
  * loadSets takes our cast file and creates a bunch of disjoint sets of
  * actors based on their movie and year.  These disjoint sets will later
