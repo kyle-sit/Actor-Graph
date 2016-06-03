@@ -51,6 +51,10 @@ public:
     bool retraceActor(Actor * root, Actor * last, std::ofstream& outfile);
 
     bool loadFromFileRes(std::ifstream& infile, int yearRes);
+
+    bool BreadthFirstSearchRes(string actor_one, string actor_two);
+
+    long findMinYearCreateActorNodes(std::ifstream & infile);
 };
 
 
