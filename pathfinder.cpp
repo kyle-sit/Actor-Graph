@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
     return -1;
   }
   
+  //create graph
   ActorGraph myGraph;
   bool loaded = myGraph.loadFromFile(argv[1], weight);
 
@@ -46,6 +47,8 @@ int main(int argc, char* argv[])
     cout << "Failed to load graph" << "\n";
     return -1;
   }
+  
+  //Call BFS or Dijkstra
   bool search = false;
   if( !weight ) {
      search = myGraph.BreadthFirstSearch(argv[3], argv[4]); 
