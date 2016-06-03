@@ -14,7 +14,6 @@
 #include "Actor.hpp"
 #include "Edge.hpp"
 #include <vector>
-//#include <set>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -29,13 +28,8 @@ protected:
 
 public:
     ActorGraph(void);
-    std::unordered_map<Edge*, std::vector<Actor*>> connections;
-    std::vector<Actor*> actors;
-    std::vector<Edge*> movies;
-    std::unordered_map<string, bool> listOfMovies;
-    std::unordered_map<string, bool> listOfActors;
-    //std::set<Actor*> actorSet;
-    //std::set<Edge*> movieSet;
+    unordered_map<string, Actor*> Aconnections;
+    unordered_map<string, Edge*> Econnections;
 
     // Maybe add some more methods here
   

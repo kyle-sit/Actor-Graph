@@ -3,26 +3,23 @@
 
 #include <string>
 #include <vector>
-#include "Edge.hpp"
+#include <unordered_map>
 
 using namespace std;
 
-class Actor {
+class Edge;
 
+class Actor {
   public:
     string actorName;
     bool visited;
     int distance;
     Actor* prevActor;
     Edge* prevMovie;
-    vector<Edge*> edges;
+    
+    unordered_map<string, Edge*> movieList;
 
-    Actor(string actorName){
-      visited = false;
-      distance = 0;
-      this->actorName = actorName;
-      this->prevActor = nullptr;
-    }
+    Actor(string actorName);
 
     bool operator<(const Actor& other) const;
 };
