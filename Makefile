@@ -40,5 +40,5 @@ ActorGraph.o: Edge.o Actor.o ActorGraph.hpp
 #commented out UnionFind.hpp and Movie.hpp for now
 
 clean:
-	rm -f pathfinder *.o core*
+	rm -f pathfinder actorconnections *.o core*
 
