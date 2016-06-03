@@ -365,81 +365,14 @@ bool ActorGraph::DijkstraSearch(const char* pairs_file, const char* out_file) {
   return true; 
 }
 
-bool ActorGraph::loadFromFileRes(std::ifstream& infile, int yearRes) {
-  
-  infile.clear();
-  infile.seekg(0, ios::beg);
+bool ActorGraph::addMovie(Edge * newMovie) {
 
-  //Check for header
-  bool have_header = false;
+    string movie_name(newMovie->movieName + to_string(newMovie->year));
 
-  // keep reading lines until the end of file is reached
-  while (infile) {
-      string s;
-
-      // get the next line
-      if (!getline( infile, s )) break;
-
-      if (!have_header) {
-          // skip the header
-          have_header = true;
-          continue;
+    for (auto ait = newMovie->actorList.begin(); ait != newMovie->actorList.end(); ++ait) {
+        (Aconnections[ait->second->actorName])->movieList[movie_name] = Econnections[movie_name];
       }
 
-      istringstream ss( s );
-      vector <string> record;
-
-      while (ss) {
-        string next;
-
-        // get the next string before hitting a tab character and put it in 'next'
-        if (!getline( ss, next, '\t' )) break;
-
-        record.push_back( next );
-      }
-      if (record.size() != 3) {
-        // we should have exactly 3 columns
-        continue;
-      }
-
-      string actor_name(record[0]);
-      string movie(record[1]);
-      string movie_title(record[1]+record[2]);
-      int movie_year = stoi(record[2]);
-
-
-      //iterator for the map find function
-      /*
-      std::unordered_map<string,Actor*>::iterator ait;
-      ait = Aconnections.find(actor_name);
-      //Actor doesn't exist in map
-      if( ait == Aconnections.end() ) {
-        Aconnections[actor_name] = new Actor(actor_name);
-      }
-      */
-
-      if( movie_year != yearRes ) {
-        continue;
-      }
-
-      std::unordered_map<string,Edge*>::iterator eit;
-
-      eit = Econnections.find(movie_title);
-      //Movie does not exist in actor nodes map
-      if( eit == Econnections.end() ) {
-        Econnections[movie_title] = new Edge(movie, movie_year);
-      }
-      
-      eit = ((Aconnections[actor_name])->movieList).find(movie_title);
-      if( eit == ((Aconnections[actor_name])->movieList).end() ) {
-        (Aconnections[actor_name])->movieList[movie_title] = Econnections[movie_title];
-      }
-
-      auto ait = ((Econnections[movie_title])->actorList).find(actor_name);
-      if( ait == ((Econnections[movie_title])->actorList).end() ) {
-        (Econnections[movie_title])->actorList[actor_name] = Aconnections[actor_name];
-      }
-  }
   return true;
 }
 
@@ -469,40 +402,40 @@ bool ActorGraph::BreadthFirstSearchRes(string actor_one, string actor_two) {
 
     std::unordered_map<string,Edge*>::iterator eit;
     //for the current node, go to all of its edges
-    //cerr << temp->actorName << endl;
     for(eit = (temp->movieList).begin(); eit != (temp->movieList).end(); ++eit) {
-      //cerr << eit->second->movieName <<endl;
       //for each of these edges, check to see if the actors its connected
       //to have been visited, if not, update them
-      //cerr << "About to segfault on: " << (eit->second)->movieName << endl;
         for(ait = (eit->second)->actorList.begin(); ait != (eit->second)->actorList.end(); ait++) {
           //if( (ait->second)->distance > temp->distance + 1 || (ait->second)->distance == 0) {
             //if we've reached the second actor, return immediately
           if( (ait->second)->visited == false ) {
-
-            if ((ait->second)->actorName == actor_two) {
-              return 1;
-            }
+            
+            
 
             (ait->second)->visited = true;
             (ait->second)->distance = temp->distance + 1;
             (ait->second)->prevActor = temp;
             (ait->second)->prevMovie = eit->second;
             explore.push(ait->second);
+            
+            if ((ait->second)->actorName == actor_two) {
+              return 1;
+            }
           }
         }
       }
     }
-  return 0;
   //after populating data fields of hash maps, has the actor we're looking for
   //been touched? if so, return 1, if not return 0
+  return 0;
   /*
   if (Aconnections[actor_two] -> prevActor != nullptr) {
     return 1;
   }
   else {
     return 0;
-  }*/
+  }
+  */
   
 }
 
