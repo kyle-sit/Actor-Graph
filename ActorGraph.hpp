@@ -49,6 +49,8 @@ public:
     bool DijkstraSearch(const char* pairs_file, const char* out_file);
 
     bool retraceActor(Actor * root, Actor * last, std::ofstream& outfile);
+
+    bool loadFromFileRes(std::ifstream& infile, int yearRes);
 };
 
 
