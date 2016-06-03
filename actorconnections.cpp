@@ -6,13 +6,20 @@
 #include <string.h>
 #include <stdio.h>
 #include <sstream>
+#include <queue>
 
-#define HEADER "Actor1  Actor2  Year"
+#define HEADER "Actor1\tActor2\tYear"
 using namespace std;
 
 //int strcmp(const char * str1, const char * str2);
 
-long ActorGraph::findMinYearCreateActorNodes(std::ifstream & infile) {
+
+
+
+long ActorGraph::buildGraph(std::ifstream & infile, 
+                              std::priority_queue <Edge*,std::vector<Edge*>,EdgePtrCmp> & moviePQ) {
+  infile.clear();
+  infile.seekg(0, ios::beg);
   //Check for header
   bool have_header = false;
   int minYear = 10000;
@@ -48,13 +55,13 @@ long ActorGraph::findMinYearCreateActorNodes(std::ifstream & infile) {
     }
 
     string actor_name(record[0]);
+    string movie_name(record[1] + record[2]);
+    string movie(record[1]);
     int movie_year = stoi(record[2]);
 
     if (movie_year < minYear) {
       minYear = movie_year;
     }
-
-
 
     //iterator for the map find function
     std::unordered_map<string,Actor*>::iterator ait;
@@ -62,8 +69,20 @@ long ActorGraph::findMinYearCreateActorNodes(std::ifstream & infile) {
     //Actor doesn't exist in map
     if( ait == Aconnections.end() ) {
       Aconnections[actor_name] = new Actor(actor_name);
-
     }
+
+    //if this is a new movie, push it back onto our priority queue
+    //and we need each edge that's in the priority queue to know about 
+    //it's ACTORS
+
+
+    auto eit = Econnections.find(movie_name);
+    if (eit == Econnections.end() ) {
+      Econnections[movie_name] = new Edge(movie, movie_year);
+      moviePQ.push(Econnections[movie_name]);
+    }
+    (Econnections[movie_name])->actorList[actor_name] = Aconnections[actor_name];
+
   }
   return minYear;
 }
@@ -108,8 +127,8 @@ int main(int argc, char* argv[])
     // keep reading lines until the end of file is reached
 
     ActorGraph myGraph;
-    int beginYear = myGraph.findMinYearCreateActorNodes(castfile);
-    bool weConnected = 0;
+    std::priority_queue<Edge*,std::vector<Edge*>,EdgePtrCmp> moviePQ;
+
 
     while (pairsfile) {
       string s;
@@ -142,38 +161,57 @@ int main(int argc, char* argv[])
 
       string actor_one(record[0]);
       string actor_two(record[1]);
-      
-      cerr << "Waiting for edges to clear: " << endl;
-      for( auto clear = myGraph.Aconnections.begin(); clear != myGraph.Aconnections.end(); clear++ ) {
+     //clears all the edge maps from all the actors 
+      for( auto clear = myGraph.Aconnections.begin(); clear != myGraph.Aconnections.end(); ++clear ) {
         clear->second->movieList.clear();
       }
-      cerr << "Cleared all actors edges " << endl;
+      //empties out the priority queue
+      while (!moviePQ.empty()) {
+        moviePQ.pop();
+      }
+      //clears our universal hash map of edges
       myGraph.Econnections.clear();
-
-      int newYear = beginYear;
+      
+      //takes our cast file, populates a field of actor nodes, fills the
+      //priority queue with populated edge nodes
+      int beginYear = myGraph.buildGraph(castfile, moviePQ);
 
       while (true) {
-        cerr << "Waiting to load the new movies " << endl;
-        (void) myGraph.loadFromFileRes(castfile, newYear);
-        cerr << "Loaded new movies " << endl;
+      
+        if (moviePQ.empty()) {
+          outfile << "9999" << endl;
+          outfile << "movie not found " ;
+          break;
+        }
+        auto shouldWeAdd = moviePQ.top();
+        //check out the top year on our PQ, if it matches the beginYear, we can
+        //add that movie
+        while (shouldWeAdd->year == beginYear) {
+          myGraph.addMovie(shouldWeAdd);
+          moviePQ.pop();
+          shouldWeAdd = moviePQ.top();
+          if (moviePQ.empty()) {
+            break;
+          }
+        }
 
+        bool weConnected = 0;
        // cerr << "BFSing with added year: " << beginYear << endl;
-        cerr << "Waiting to BFS " << endl;
         weConnected = myGraph.BreadthFirstSearchRes(actor_one, actor_two);
-        cerr << "Finished a BFS " << endl;
 
         if (weConnected == 1) {
           outfile << actor_one << "\t";
           outfile << actor_two << "\t";
-          outfile << newYear << endl;
+          outfile << beginYear << endl;
           break;
         }
         //ran through all years, still failed
-        if (newYear == 2015) {
+        if (beginYear == 2015) {
           outfile << "9999" << endl;
           break;
+        
         }
-        newYear++;
+        beginYear++;
       }
     }
   }
@@ -184,6 +222,8 @@ int main(int argc, char* argv[])
 
   return 1;
 }
+
+
 
 
 

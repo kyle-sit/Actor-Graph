@@ -18,8 +18,16 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
+#include <queue>
 
 using namespace std;
+
+class EdgePtrCmp {
+  public:
+    bool operator()(Edge* lhs, Edge* rhs) const {
+      return (lhs->year > rhs->year);
+    }
+};
 
 class ActorGraph {
 protected:
@@ -50,12 +58,15 @@ public:
 
     bool retraceActor(Actor * root, Actor * last, std::ofstream& outfile);
 
-    bool loadFromFileRes(std::ifstream& infile, int yearRes);
+    bool addMovie(Edge * movieAdded);
 
     bool BreadthFirstSearchRes(string actor_one, string actor_two);
 
-    long findMinYearCreateActorNodes(std::ifstream & infile);
+    long buildGraph(std::ifstream & infile, 
+                      std::priority_queue <Edge*,std::vector<Edge*>,EdgePtrCmp> & moviePQ);
 };
+
+
 
 
 #endif // ACTORGRAPH_HPP
