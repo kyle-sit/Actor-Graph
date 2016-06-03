@@ -20,14 +20,19 @@ all: pathfinder actorconnections
 
 pathfinder: ActorGraph.o
 
-actorconnections: ActorGraph.o
+actorconnections: ActorGraph.o DisjointSet.o
 
 # include what ever source code *.hpp files ActorGraph relies on (these are merely the ones that were used in the solution)
 
 # Note: you do not have to include a *.cpp file if it aleady has a paired *.hpp file that is already included with class/method headers
 
-Edge.o: Edge.hpp
+Movie.o: Movie.hpp
 
+ActorNode.o: ActorNode.hpp
+
+DisjointSet.o: Movie.o ActorNode.o
+
+Edge.o: Edge.hpp
 
 Actor.o: Actor.hpp
 

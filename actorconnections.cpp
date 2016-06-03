@@ -1,6 +1,7 @@
 #include "ActorGraph.hpp"
 #include "Edge.hpp"
 #include "Actor.hpp"
+#include "DisjointSet.hpp"
 #include <iostream>
 #include <fstream>
 #include <string.h>
@@ -179,10 +180,80 @@ int main(int argc, char* argv[])
   }
   //UNION FIND CASE 
   else {
-    
-  }
+    //Check for header
+    bool have_header = false;
 
+    // keep reading lines until the end of file is reached
+
+    DisjointSet DS;
+    int beginYear = DS.loadSets(castfile);
+    int currYear = 0;
+    while (pairsfile) {
+      string s;
+
+      // get the next line
+      if (!getline( pairsfile, s )) break;
+
+      if (!have_header) {
+        // skip the header
+        have_header = true;
+        continue;
+      }
+
+      istringstream ss( s );
+      vector <string> record;
+
+      while (ss) {
+        string next;
+
+        // get the next string before hitting a tab character and put it in 'next'
+        if (!getline( ss, next, '\t' )) break;
+
+        record.push_back( next );
+      }
+
+      if (record.size() != 2) {
+        // we should have exactly 3 columns
+        continue;
+      }
+
+      string actor_one(record[0]);
+      string actor_two(record[1]);
+      ActorNode* first = DS.DJactors[actor_one];
+      ActorNode* second = DS.DJactors[actor_two];
+      bool success = false;
+
+      for( auto ait = DS.DJactors.begin(); ait != DS.DJactors.end(); ++ait ) {
+        (ait->second)->parent = nullptr;
+      }
+
+      cerr << "NEXT PAIR" << endl;
+      currYear = beginYear;
+      while( currYear < 2016 ) {
+        success = DS.actorUnion(currYear);
+        if( !success ) {
+          currYear++;
+          continue;
+        }
+        success = DS.find(first, second);
+        if( !success ) {
+          currYear++;
+        }
+        else {
+          break;
+        }
+      }
+
+      if( success ) {
+        outfile << actor_one << "\t" << actor_two << "\t" << currYear << endl; 
+      }
+      else {
+        outfile << "9999" << endl;
+      }
+    }
+  }
   return 1;
+
 }
 
 

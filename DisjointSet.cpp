@@ -15,6 +15,8 @@
 #include <unordered_map>
 #include <sstream>
 #include "DisjointSet.hpp"
+#include "ActorNode.cpp"
+#include "Movie.cpp"
 
 #define HYPHENS "--"
 #define FINAL_ARROW "-->"
@@ -25,12 +27,11 @@ using namespace std;
 
 DisjointSet::DisjointSet() {}
 
-bool DisjointSet::loadSets(const char* file_name) {
+int DisjointSet::loadSets(std::ifstream& infile) {
   
-    ifstream infile(file_name);    
-
     //Check for header
     bool have_header = false;
+    int smallestYear = 1000000;
  
     // keep reading lines until the end of file is reached
     while (infile) {
@@ -67,47 +68,66 @@ bool DisjointSet::loadSets(const char* file_name) {
         string movie(record[1]);
         int movie_year = stoi(record[2]);
 
+        if( movie_year < smallestYear ) {
+          smallestYear = movie_year;
+        }
+
         //iterator for the map find function
         std::unordered_map<string,ActorNode*>::iterator ait;
-        std::unordered_map<int,Movie*>::iterator yit;
+        std::unordered_map<string,Movie*>::iterator mit;
 
         ait = DJactors.find(actor_name);
         if( ait == DJactors.end() ) {
-          DJactor[actor_name] = new ActorNode(actor_name);
+          DJactors[actor_name] = new ActorNode(actor_name);
         }
 
-        yit = (yearList[year]).find(movie_title);
-        if( yit == (yearList[year]).end() ) {
-          (yearList[year])[movie_title] = new Movie(movie, year);
+        mit = (yearList[movie_year]).find(movie_title);
+        if( mit == (yearList[movie_year]).end() ) {
+          (yearList[movie_year])[movie_title] = new Movie(movie, movie_year);
         }
 
-        ((yearList[year])[movie_title])->actorList[actor_name] = DJactors[actor_name];
+        ((yearList[movie_year])[movie_title])->actorNList[actor_name] = DJactors[actor_name];
+    }
+    return smallestYear;
 }
 
-bool actorUnion(int year) {
-        std::unordered_map<int,Movie*>::iterator yit;
+bool DisjointSet::actorUnion(int year) {
+        std::unordered_map<int,unordered_map<string,Movie*>>::iterator yit;
         yit = yearList.find(year);
-        
+       
+        cerr << year << endl;
         if( yit == yearList.end() ) {
           return false;
         }
  
-        std::unordered_map<string,ActorNode*> ait;
+        std::unordered_map<string,ActorNode*>::iterator ait;
         std::unordered_map<string,Movie*>::iterator mit;
+        int count1 = 0;
+        int count2 = 0;
         for( mit = yearList[year].begin(); mit != yearList[year].end(); ++mit ) {
           ait = (mit->second)->actorNList.begin();
-          ActorNode* temp = ait->second;
+          ActorNode* root1 = ufind(ait->second, count1);
+          ActorNode* root2;
+          cerr << ait->second->actorName <<endl;
           ++ait;
           for( ; ait != (mit->second)->actorNList.end(); ++ait ) {
-            (ait->second)->parent = temp;
-          }  
+            root2 = ufind((ait->second), count2);
+            if( count1 > count2 ) {
+              root2->parent = root1;
+            }
+            else {
+              root1->parent = root2;
+              root1 = root2;
+            }
+            cerr << ait->second->actorName <<endl;
+          }
         }
 
         return true;
 }
 
 
-bool find(ActorNode* first, ActorNode* second) {
+bool DisjointSet::find(ActorNode* first, ActorNode* second) {
   ActorNode* temp = first;
   ActorNode* temp2 = second;
 
@@ -126,4 +146,13 @@ bool find(ActorNode* first, ActorNode* second) {
   return false;
 }
 
+
+ActorNode* DisjointSet::ufind(ActorNode* temp, int& count) {
+  count = 0;
+  while( temp->parent ) {
+    temp = temp->parent;
+    count++;
+  }
+  return temp;
+}
 

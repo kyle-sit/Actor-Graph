@@ -10,9 +10,9 @@ using namespace std;
 class ActorNode {
   public:
     string actorName;
-    Actor* parent;
+    ActorNode* parent;
     
-    Actor(string actorName);
+    ActorNode(string actorName);
 };
 #endif 
 

@@ -39,10 +39,13 @@ public:
      *
      * return true if file was loaded sucessfully, false otherwise
      */
-    bool loadSets(const char* file_name);
+    int loadSets(std::ifstream& infile);
    
     bool actorUnion(int year);
     
     bool find(ActorNode* first, ActorNode* second);
+
+    ActorNode* ufind(ActorNode* temp, int& count);
+
 };
 #endif
