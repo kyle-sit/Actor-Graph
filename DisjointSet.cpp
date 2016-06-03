@@ -95,7 +95,6 @@ bool DisjointSet::actorUnion(int year) {
         std::unordered_map<int,unordered_map<string,Movie*>>::iterator yit;
         yit = yearList.find(year);
        
-        cerr << year << endl;
         if( yit == yearList.end() ) {
           return false;
         }
@@ -108,7 +107,6 @@ bool DisjointSet::actorUnion(int year) {
           ait = (mit->second)->actorNList.begin();
           ActorNode* root1 = ufind(ait->second, count1);
           ActorNode* root2;
-          cerr << ait->second->actorName <<endl;
           ++ait;
           for( ; ait != (mit->second)->actorNList.end(); ++ait ) {
             root2 = ufind((ait->second), count2);
@@ -119,7 +117,6 @@ bool DisjointSet::actorUnion(int year) {
               root1->parent = root2;
               root1 = root2;
             }
-            cerr << ait->second->actorName <<endl;
           }
         }
 
@@ -132,10 +129,16 @@ bool DisjointSet::find(ActorNode* first, ActorNode* second) {
   ActorNode* temp2 = second;
 
   while( temp->parent ) {
+    if( temp == temp->parent ) {
+      break;
+    }
     temp = temp->parent;
   }
 
   while( temp2->parent ) {
+    if( temp2 == temp2->parent ) {
+      break;
+    }
     temp2 = temp2->parent;
   }
 
@@ -150,6 +153,9 @@ bool DisjointSet::find(ActorNode* first, ActorNode* second) {
 ActorNode* DisjointSet::ufind(ActorNode* temp, int& count) {
   count = 0;
   while( temp->parent ) {
+    if( temp == temp->parent ) {
+      break;
+    }
     temp = temp->parent;
     count++;
   }

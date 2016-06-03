@@ -1,3 +1,11 @@
+/*
+ * Actor.hpp
+ * Author: Kyle Sit, Louis Leung
+ * Date: 6/2/16
+ *
+ * This file holds design of the Actors in the Graph
+ */
+
 #ifndef ACTOR_HPP
 #define ACTOR_HPP
 
@@ -7,8 +15,10 @@
 
 using namespace std;
 
+//forward declaration 
 class Edge;
 
+//Class with member variables
 class Actor {
   public:
     string actorName;
@@ -23,6 +33,7 @@ class Actor {
 
     bool operator<(const Actor& other) const;
 };
+
 //Used to construct a minheap instead of a PQ default maxheap
 class ActorPtrComp {
 public:
