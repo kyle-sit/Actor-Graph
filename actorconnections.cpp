@@ -1,3 +1,13 @@
+
+/*
+ * ActorGraph.cpp
+ * Author: <YOUR NAME HERE>
+ * Date:   <DATE HERE>
+ *
+ * This file is meant to exist as a container for starter code that you can use to read the input file format
+ * defined in movie_casts.tsv. Feel free to modify any/all aspects as you wish.
+ */
+
 #include "ActorGraph.hpp"
 #include "Edge.hpp"
 #include "Actor.hpp"
@@ -8,7 +18,7 @@
 #include <stdio.h>
 #include <sstream>
 
-#define HEADER "Actor1  Actor2  Year"
+#define HEADER "Actor1\tActor2\tYear"
 using namespace std;
 
 //int strcmp(const char * str1, const char * str2);
@@ -227,7 +237,6 @@ int main(int argc, char* argv[])
         (ait->second)->parent = nullptr;
       }
 
-      cerr << "NEXT PAIR" << endl;
       currYear = beginYear;
       while( currYear < 2016 ) {
         success = DS.actorUnion(currYear);
@@ -248,7 +257,7 @@ int main(int argc, char* argv[])
         outfile << actor_one << "\t" << actor_two << "\t" << currYear << endl; 
       }
       else {
-        outfile << "9999" << endl;
+        outfile << actor_one << "\t" << actor_two << "\t" << "9999" << endl;
       }
     }
   }
