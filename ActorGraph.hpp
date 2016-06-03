@@ -1,12 +1,10 @@
 /*
  * ActorGraph.hpp
- * Author: <YOUR NAME HERE>
- * Date:   <DATE HERE>
+ * Author: Kyle Sit, Louis Leung
+ * Date: 6/2/16
  *
- * This file is meant to exist as a container for starter code that you can use to read the input file format
- * defined in movie_casts.tsv. Feel free to modify any/all aspects as you wish.
+ * This file contains the design of our ActorGraph container
  */
-
 
 #ifndef ACTORGRAPH_HPP
 #define ACTORGRAPH_HPP
@@ -22,6 +20,9 @@
 
 using namespace std;
 
+/* 
+ * This class is a comparator class used to create a minHeap 
+ */
 class EdgePtrCmp {
   public:
     bool operator()(Edge* lhs, Edge* rhs) const {
@@ -29,44 +30,44 @@ class EdgePtrCmp {
     }
 };
 
+//Class definition
 class ActorGraph {
-protected:
-  
-    // Maybe add class data structure(s) here
-
 public:
+    //Constructor
     ActorGraph(void);
+    //Member Variables
     unordered_map<string, Actor*> Aconnections;
     unordered_map<string, Edge*> Econnections;
 
-    // Maybe add some more methods here
-  
-    /** You can modify this method definition as you wish
-     *
+    /*
      * Load the graph from a tab-delimited file of actor->movie relationships.
      *
      * in_filename - input filename
-     * use_weighted_edges - if true, compute edge weights as 1 + (2015 - movie_year), otherwise all edge weights will be 1
+     * use_weighted_edges - if true, compute edge weights as 
+     * 1 + (2015 - movie_year), otherwise all edge weights will be 1
      *
      * return true if file was loaded sucessfully, false otherwise
      */
     bool loadFromFile(const char* file_name, bool use_weighted_edges);
     
+    //BFS that searches through all edges and actors
     bool BreadthFirstSearch(const char* pairs_file, const char* out_file);
     
+    //Searches through all edges and actors but modifies acccording to weight
     bool DijkstraSearch(const char* pairs_file, const char* out_file);
 
+    //Print method
     bool retraceActor(Actor * root, Actor * last, std::ofstream& outfile);
 
+    //Used in actorconnections to add a movie edge
     bool addMovie(Edge * movieAdded);
 
+    //Second BFS used to search edges year by year
     bool BreadthFirstSearchRes(string actor_one, string actor_two);
 
+    //Builds the edges year by year
     long buildGraph(std::ifstream & infile, 
-                      std::priority_queue <Edge*,std::vector<Edge*>,EdgePtrCmp> & moviePQ);
+         std::priority_queue <Edge*,std::vector<Edge*>,EdgePtrCmp> & moviePQ);
 };
-
-
-
 
 #endif // ACTORGRAPH_HPP

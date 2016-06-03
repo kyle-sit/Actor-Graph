@@ -1,11 +1,9 @@
-
 /*
- * ActorGraph.cpp
- * Author: <YOUR NAME HERE>
- * Date:   <DATE HERE>
+ * Movie.cpp
+ * Author: Kyle Sit, Louis Leung
+ * Date: 6/2/16
  *
- * This file is meant to exist as a container for starter code that you can use to read the input file format
- * defined in movie_casts.tsv. Feel free to modify any/all aspects as you wish.
+ * This file contains the implementation of the movie class used in ufind
  */
 
 #include "Movie.hpp"
@@ -14,6 +12,7 @@
 
 using namespace std;
 
+//constructor
 Movie::Movie(string movieName, int year) {
   this->movieName = movieName;
   this->year = year;

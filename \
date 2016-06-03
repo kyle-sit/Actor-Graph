@@ -319,7 +319,7 @@ bool ActorGraph::DijkstraSearch(const char* pairs_file, const char* out_file) {
     while (ss) {
       string next;
 
-      //get the next string before hitting a tab character and put it in 'next'
+      // get the next string before hitting a tab character and put it in 'next'
       if (!getline( ss, next, '\t' )) break;
 
       record.push_back( next );
@@ -469,11 +469,7 @@ bool ActorGraph::BreadthFirstSearchRes(string actor_one, string actor_two) {
   return 0;
 }
 
-/*
- * This method builds the graph year by year for our second BFS.  We call BFS
- * in a loop that only has movies by year incrementally.  This build allows
- * us to build only actors and edges connected before a certain year.
- */
+
 long ActorGraph::buildGraph(std::ifstream & infile, 
         std::priority_queue <Edge*,std::vector<Edge*>,EdgePtrCmp> & moviePQ) {
   //Make sure youre at the beginning of the file
@@ -503,7 +499,7 @@ long ActorGraph::buildGraph(std::ifstream & infile,
     while (ss) {
       string next;
 
-      //get the next string before hitting a tab character and put it in 'next'
+      // get the next string before hitting a tab character and put it in 'next'
       if (!getline( ss, next, '\t' )) break;
 
       record.push_back( next );
@@ -541,8 +537,7 @@ long ActorGraph::buildGraph(std::ifstream & infile,
       Econnections[movie_name] = new Edge(movie, movie_year);
       moviePQ.push(Econnections[movie_name]);
     }
-    (Econnections[movie_name])->actorList[actor_name] =
-                                                  Aconnections[actor_name];
+    (Econnections[movie_name])->actorList[actor_name] = Aconnections[actor_name];
 
   }
   return minYear;
