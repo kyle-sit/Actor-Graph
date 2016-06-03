@@ -219,7 +219,7 @@ bool ActorGraph::retraceActor(Actor * root, Actor * last, std::ofstream& outfile
       tempA = tempA->prevActor;
     }
     else {
-      outfile << "9999" << "\n";
+      outfile << "9999";
       return -1;
     }
   }
@@ -360,4 +360,69 @@ bool ActorGraph::DijkstraSearch(const char* pairs_file, const char* out_file) {
     }
   }
   return true; 
+}
+
+bool ActorGraph::loadFromFileRes(std::ifstream& infile, int yearRes) {
+
+  //Check for header
+  bool have_header = false;
+
+  // keep reading lines until the end of file is reached
+  while (infile) {
+      string s;
+
+      // get the next line
+      if (!getline( infile, s )) break;
+
+      if (!have_header) {
+          // skip the header
+          have_header = true;
+          continue;
+      }
+
+      istringstream ss( s );
+      vector <string> record;
+
+      while (ss) {
+        string next;
+
+        // get the next string before hitting a tab character and put it in 'next'
+        if (!getline( ss, next, '\t' )) break;
+
+        record.push_back( next );
+      }
+
+      if (record.size() != 3) {
+        // we should have exactly 3 columns
+        continue;
+      }
+
+      string actor_name(record[0]);
+      string movie(record[1]);
+      string movie_title(record[1]+record[2]);
+      int movie_year = stoi(record[2]);
+
+      if( movie_year != yearRes ) {
+        continue;
+      }
+
+      //iterator for the map find function
+      std::unordered_map<string,Actor*>::iterator ait;
+      std::unordered_map<string,Edge*>::iterator eit;
+      ait = Aconnections.find(actor_name);
+      //Actor doesn't exist in map
+      if( ait == Aconnections.end() ) {
+        Aconnections[actor_name] = new Actor(actor_name);
+      }
+
+      eit = Econnections.find(movie_title);
+      //Movie does not exist in actor nodes map
+      if( eit == Econnections.end() ) {
+        Econnections[movie_title] = new Edge(movie, movie_year);
+      }
+
+      (Aconnections[actor_name])->movieList[movie_title] = Econnections[movie_title];
+      (Econnections[movie_title])->actorList[actor_name] = Aconnections[actor_name];
+  }
+  return true;
 }
